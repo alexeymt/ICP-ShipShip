@@ -1,0 +1,56 @@
+{
+  "canisters": {
+    "hello_world_sm_backend": {
+      "build": "npx azle hello_world_sm_backend",
+      "candid": "src/hello_world_sm_backend/hello_world_sm_backend.did",
+      "gzip": true,
+      "main": "src/hello_world_sm_backend/src/index.ts",
+      "tech_stack": {
+        "cdk": {
+          "azle": {}
+        },
+        "language": {
+          "typescript": {}
+        }
+      },
+      "type": "custom",
+      "wasm": ".azle/hello_world_sm_backend/hello_world_sm_backend.wasm"
+    },
+    "hello_world_sm_frontend": {
+      "dependencies": [
+        "hello_world_sm_backend"
+      ],
+      "source": [
+        "src/hello_world_sm_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "hello_world_sm_frontend"
+    },
+    "internet_identity": {
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "frontend": {},
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+    }
+  },
+  "defaults": {
+    "bitcoin": {
+      "enabled": true,
+      "log_level": "info",
+      "nodes": [
+        "127.0.0.1:18444"
+      ]
+    },
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
