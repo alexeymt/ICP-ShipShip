@@ -7,19 +7,31 @@
 .DS_Store
 **/.DS_Store
 
+# Logs
+*.log
+yarn-error.log
+
 # dfx temporary files
 .dfx/
-
-# generated files
-**/declarations/
-
-# rust
-target/
+.azle
 
 # frontend code
 node_modules/
 dist/
-.svelte-kit/
-
-# environment variables
 .env
+
+src/**/*.did
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+yarn.lock
+package-lock.json
+
+deps
+.yarn
+/src/declarations

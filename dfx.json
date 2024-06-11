@@ -1,56 +1,32 @@
 {
   "canisters": {
-    "hello_world_sm_backend": {
-      "build": "npx azle hello_world_sm_backend",
-      "candid": "src/hello_world_sm_backend/hello_world_sm_backend.did",
+    "internet-identity": {
+      "type": "pull",
+      "id": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+      "frontend": {}
+    },
+    "wedding": {
+      "type": "custom",
+      "main": "src/wedding/wedding.ts",
+      "build": "npx azle wedding",
+      "candid": "src/wedding/wedding.did",
+      "wasm": ".azle/wedding/wedding.wasm",
       "gzip": true,
-      "main": "src/hello_world_sm_backend/src/index.ts",
-      "tech_stack": {
-        "cdk": {
-          "azle": {}
-        },
-        "language": {
-          "typescript": {}
-        }
-      },
-      "type": "custom",
-      "wasm": ".azle/hello_world_sm_backend/hello_world_sm_backend.wasm"
+      "post_install": ["dfx generate"]
     },
-    "hello_world_sm_frontend": {
-      "dependencies": [
-        "hello_world_sm_backend"
-      ],
-      "source": [
-        "src/hello_world_sm_frontend/dist"
-      ],
+    "app": {
       "type": "assets",
-      "workspace": "hello_world_sm_frontend"
-    },
-    "internet_identity": {
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "frontend": {},
-      "remote": {
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      },
-      "type": "custom",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+      "build": "yarn build",
+      "source": ["src/app/dist"],
+      "frontend": {}
     }
   },
   "defaults": {
-    "bitcoin": {
-      "enabled": true,
-      "log_level": "info",
-      "nodes": [
-        "127.0.0.1:18444"
-      ]
-    },
     "build": {
       "args": "",
       "packtool": ""
     }
   },
   "output_env_file": ".env",
-  "version": 1
+  "version": 2
 }

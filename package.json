@@ -1,19 +1,81 @@
 {
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
-  },
-  "name": "hello_world_sm",
+  "name": "icp-staking",
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "prebuild": "npm run prebuild --workspaces --if-present",
-    "pretest": "npm run prebuild --workspaces --if-present",
-    "start": "npm start --workspaces --if-present",
-    "test": "npm test --workspaces --if-present"
+    "start:dfx": "dfx start --background --clean --host \"127.0.0.1:4943\"",
+    "start": "vite src/app --config vite.config.js",
+    "build": "vite build src/app --config vite.config.js",
+    "prestart": "yarn generate",
+    "prebuild": "yarn generate",
+    "generate": "dfx generate",
+    "azle": "./node_modules/.bin/azle"
   },
-  "type": "module",
-  "workspaces": [
-    "src/hello_world_sm_backend",
-    "src/hello_world_sm_frontend"
-  ]
+  "dependencies": {
+    "@dfinity/agent": "^0.19.3",
+    "@dfinity/auth-client": "^0.19.3",
+    "@dfinity/candid": "^0.19.3",
+    "@dfinity/identity": "0.19.3",
+    "@dfinity/ledger-icp": "^1.0.0",
+    "@dfinity/nns": "^2.0.0",
+    "@dfinity/nns-proto": "^1.0.0",
+    "@dfinity/principal": "^0.19.3",
+    "@dfinity/utils": "^1.0.0",
+    "@emotion/react": "11.11.1",
+    "@emotion/styled": "11.11.0",
+    "@svgr/rollup": "8.1.0",
+    "@vitejs/plugin-react": "^4.1.1",
+    "rc-dialog": "9.3.4",
+    "react": "^18.2.0",
+    "react-copy-to-clipboard": "5.1.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.3.0",
+    "react-router-dom": "^6.3.0",
+    "react-toastify": "^9.1.3",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
+    "uuid": "^9.0.0",
+    "vite-plugin-svgr": "4.1.0"
+  },
+  "devDependencies": {
+    "@emotion/babel-plugin": "11.11.0",
+    "@emotion/css": "11.11.2",
+    "@types/node": "20.9.0",
+    "@types/react": "18.2.37",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/uuid": "^9.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "assert": "2.0.0",
+    "azle": "0.18.6",
+    "buffer": "6.0.3",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb": "^19.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.27.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "events": "3.3.0",
+    "moment": "2.29.4",
+    "prettier": "^2.4.1",
+    "process": "0.11.10",
+    "sass": "1.69.5",
+    "stream-browserify": "3.0.0",
+    "util": "0.12.4",
+    "vite": "^4.3.6",
+    "vite-plugin-environment": "^1.1.3"
+  },
+  "browserslist": [
+    "last 2 chrome version",
+    "last 2 firefox version",
+    "last 2 safari version",
+    "last 2 edge version"
+  ],
+  "resolutions": {
+    "azle@0.18.6": "patch:azle@npm%3A0.18.6#./.yarn/patches/azle-npm-0.18.6-ffa548fe8f.patch"
+  },
+  "packageManager": "yarn@3.6.3"
 }
