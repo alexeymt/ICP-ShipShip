@@ -1,0 +1,13 @@
+diff --git a/src/lib/stable_b_tree_map.ts b/src/lib/stable_b_tree_map.ts
+index a42f1227a2b55ea12bee4b1448a5f1ba70ecf3b8..d8b07d6c1918525e88e3f1ac833721b22d8db3b3 100644
+--- a/src/lib/stable_b_tree_map.ts
++++ b/src/lib/stable_b_tree_map.ts
+@@ -10,7 +10,7 @@ export function StableBTreeMap<
+     Value extends CandidType
+ >(keyType: Key, valueType: Value, memoryId: nat8) {
+     if (globalThis._azleIc === undefined) {
+-        return undefined as any;
++        return undefined;
+     }
+     const candidEncodedMemoryId = encode(nat8, memoryId).buffer;
+ 
