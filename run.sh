@@ -10,4 +10,5 @@ rm -rf src/app/dist
 rm -rf src/declarations
 npm install
 yarn install
+dfx generate
 dfx deploy
