@@ -1,0 +1,7 @@
+service: () -> {
+    agreeToMarry: () -> ();
+    getAppVersion: () -> (text) query;
+    getPartnerInfo: (principal) -> (opt record {id:principal; name:opt text; wedding:text; isAgreed:bool}) query;
+    getWeddingInfoOf: (principal) -> (opt record {id:text; hadAt:nat; partner1:record {id:principal; name:opt text; wedding:text; isAgreed:bool}; partner2:record {id:principal; name:opt text; wedding:text; isAgreed:bool}}) query;
+    matchPartner: (text, principal) -> ();
+}
