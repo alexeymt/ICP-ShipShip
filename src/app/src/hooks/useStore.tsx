@@ -7,9 +7,7 @@ import { Principal } from '@dfinity/principal';
 import { canisterId as weddingCanisterId, createActor as createWeddingActor } from '../../../declarations/wedding';
 import { _SERVICE as _WEDDING_SERVICE } from '../../../declarations/wedding/wedding.did';
 
-const IS_MAINNET = process.env.DFX_NETWORK === 'ic';
-
-const LEDGER_HOST = process.env.LEDGER_HOST;
+const  IS_LOCAL = process.env.DFX_NETWORK === 'local';
 
 const defaultOptions: {
   createOptions: AuthClientCreateOptions;
@@ -22,9 +20,9 @@ const defaultOptions: {
     },
   },
   loginOptions: {
-    identityProvider: IS_MAINNET
-      ? 'https://identity.ic0.app/#authorize'
-      : `http://${LEDGER_HOST}?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai#authorize`,
+    identityProvider: IS_LOCAL
+      ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
+      : 'https://identity.ic0.app/#authorize',
   },
 };
 
@@ -40,7 +38,6 @@ const useStore_ = (options = defaultOptions) => {
   const isPartner1 = weddingInfo?.partner1.id && principal?.compareTo(weddingInfo.partner1.id) === 'eq';
   const myPartnerInfo = isPartner1 ? weddingInfo?.partner1 : weddingInfo?.partner2;
   const otherPartnerInfo = isPartner1 ? weddingInfo?.partner2 : weddingInfo?.partner1;
-/*  const [versionInfo, setVersionInfo] = useState<Awaited<ReturnType<_WEDDING_SERVICE['getAppVersion']>>[0] | null>() ;*/
 
   const handleGetWeddingInfo = async (weddingActor_ = weddingActor!, principal_ = principal!) => {
     try {
