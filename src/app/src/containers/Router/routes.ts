@@ -18,5 +18,9 @@ export const routes = {
   version: {
     root: '/version',
     title: 'version',
-  }
+  },
+  choose: {
+    root: '/choose-rings',
+    title: 'choose rings',
+  },
 };

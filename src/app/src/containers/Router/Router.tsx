@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { Ceremony, Certificate, Connect, Landing, Version } from '../../pages';
+import { Ceremony, Certificate, ChooseRing, Connect, Landing, Version } from '../../pages';
 
 import { routes } from './routes';
 
@@ -14,6 +14,7 @@ export const LayoutRoutes: FC = () => {
       <Route path={routes.ceremony.root} element={<Ceremony />} />
       <Route path={routes.certificate.root} element={<Certificate />} />
       <Route path={routes.version.root} element={<Version />} />
+      <Route path={routes.choose.root} element={<ChooseRing />} />
     </Routes>
   );
 };
