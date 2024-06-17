@@ -19,6 +19,11 @@
       "build": "yarn build",
       "source": ["src/app/dist"],
       "frontend": {}
+    },
+    "dip721_nft_container": {
+      "type": "rust",
+      "candid": "src/dip721-nft-container/dip721-nft-container.did",
+      "package": "dip721_nft_container"
     }
   },
   "defaults": {
