@@ -7,12 +7,3 @@ declare module '*.svg' {
   const src: string;
   export default src;
 }
-
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      DFX_NETWORK: 'ic';
-      LEDGER_HOST: string;
-    }
-  }
-}
