@@ -13,6 +13,7 @@ ic-certified-map = "0.3"
 sha2 = "0.10.2"
 serde_cbor = "0.11.2"
 base64 = "0.13.0"
+serde_json = "1.0.79"
 
 [lib]
 path = 'src/dip721-nft-container/lib.rs'

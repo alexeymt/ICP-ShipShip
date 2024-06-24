@@ -17,8 +17,7 @@
       "build": "npx azle wedding",
       "candid": "src/wedding/wedding.did",
       "wasm": ".azle/wedding/wedding.wasm",
-      "gzip": true,
-      "post_install": ["dfx generate"]
+      "gzip": true
     },
     "app": {
       "type": "assets",
@@ -30,7 +29,7 @@
       "type": "rust",
       "candid": "src/dip721-nft-container/dip721-nft-container.did",
       "package": "dip721_nft_container",
-      "init_arg": "(record {name = \"Ship-Ship Rings\";logo=null;symbol=\"SSRNG\";custodians = opt vec { principal \"2vxsx-fae\" };})"
+      "init_arg": "(record {name = \"Ship-Ship Rings\";logo=null;symbol=\"SSRNG\";custodians = opt vec { principal \"bw4dl-smaaa-aaaaa-qaacq-cai\" };})"
     }
   },
   "defaults": {

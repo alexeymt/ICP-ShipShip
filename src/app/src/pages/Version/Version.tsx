@@ -1,23 +1,26 @@
-import { GradientTypography } from '../../styles';
-import { useStore } from '../../hooks';
-import { useEffect, useState } from 'react';
+import {GradientTypography} from '../../styles';
+import {useStore} from '../../hooks';
+import {useEffect, useState} from 'react';
+
 
 export const Version = () => {
-  const { weddingActor } = useStore();
-  const [backendVersion, setBackendVersion] = useState('');
+    const {weddingActor, principal} = useStore();
+    const [backendVersion, setBackendVersion] = useState('');
+    const [mintResult, setMintResult] = useState('');
 
-  useEffect(() => {
-    async function getBackendVersion() {
-      const version = await weddingActor.getAppVersion();
-      setBackendVersion(version);
-    }
+    useEffect(() => {
+        async function getBackendVersion() {
+            await weddingActor.getAppVersion()
+                .then(x => setBackendVersion(x));
+            await weddingActor.mintNft("some text", principal)
+                .then(_ => console.log("NFT minted"))
+        }
+        getBackendVersion();
+    }, []);
 
-    getBackendVersion();
-  }, []);
-
-  return (
-    <div>
-      <GradientTypography variant="h1">Backend: {backendVersion}</GradientTypography>
-    </div>
-  );
+    return (
+        <div>
+            <GradientTypography variant="h1">Backend: {backendVersion}, mintResult: {mintResult}</GradientTypography>
+        </div>
+    );
 };
