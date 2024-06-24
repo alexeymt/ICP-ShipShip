@@ -363,6 +363,13 @@ fn mint(
 ) -> Result<MintResult, ConstrainedError> {
     let (txid, tkid) = STATE.with(|state| {
         let mut state = state.borrow_mut();
+
+        ic_cdk::println!("api caller: {}", &api::caller());
+
+        for custodian in &state.custodians {
+            ic_cdk::println!("state.custodians: {}", custodian);
+        }
+
         if !state.custodians.contains(&api::caller()) {
             return Err(ConstrainedError::Unauthorized);
         }
