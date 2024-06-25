@@ -4,6 +4,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Ceremony, Certificate, ChooseRing, Connect, Landing, Version } from '../../pages';
 
 import { routes } from './routes';
+import { Invitation } from '../../pages/Invitation/Invitation';
+import { Reject } from '../../pages/Reject/Reject';
 
 export const LayoutRoutes: FC = () => {
   return (
@@ -15,6 +17,8 @@ export const LayoutRoutes: FC = () => {
       <Route path={routes.certificate.root} element={<Certificate />} />
       <Route path={routes.version.root} element={<Version />} />
       <Route path={routes.choose.root} element={<ChooseRing />} />
+      <Route path={routes.invitation.root} element={<Invitation />} />
+      <Route path={routes.reject.root} element={<Reject />} />
     </Routes>
   );
 };

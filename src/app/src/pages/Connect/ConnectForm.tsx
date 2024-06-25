@@ -8,7 +8,7 @@ import { routes } from '../../containers';
 import { useStore } from '../../hooks';
 import { CeremonyContainer, GradientTypography } from '../../styles';
 
-import { SharePrincipal } from './SharePrincipal';
+import { ShareLink } from './ShareLink';
 
 const buttonStyles = {
   display: 'flex',
@@ -21,13 +21,17 @@ const buttonStyles = {
 export const Form = () => {
   const navigate = useNavigate();
   const { principal, weddingActor, handleGetWeddingInfo } = useStore();
-
   const [myName, setMyName] = useState('');
+  const [myPartnerName, setMyPartnerName] = useState('');
   const [partnerPrincipleText, setPartnerPrincipleText] = useState('');
   const [isGetConnectedButtonDisabled, setIsGetConnectedButtonDisabled] = useState(false);
 
   const handleMyNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setMyName(event.target.value);
+  }, []);
+
+  const handleMyPartnerChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setMyPartnerName(event.target.value);
   }, []);
 
   const handlePartnerPrincipleTextChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -69,14 +73,24 @@ export const Form = () => {
 
       <form onSubmit={handleMatchPartner}>
         <Input title="Your name" onChange={handleMyNameChange} placeholder="Xiao Yan" sx={{ marginTop: 39 }} />
-
-        <SharePrincipal principal={principal?.toText?.()} />
-
+        <Input
+          title="Your partner’s name"
+          onChange={handleMyPartnerChange}
+          placeholder="Ashley Green"
+          sx={{ marginTop: 20 }}
+        />
         <Input
           title="Paste your partner’s ID"
           onChange={handlePartnerPrincipleTextChange}
           placeholder="so5z4-2ggdf-ocjtb-s3ech-pukgc-jsiar-6zy35-zlbqk-vhsal-osjl7-fae"
-          sx={{ marginTop: 56 }}
+          sx={{ marginTop: 20 }}
+        />
+
+        <ShareLink
+          title="Invite your partner to connect"
+          description="Share link:"
+          link={`/invitation?partnerName=${myPartnerName}&principal=${principal}`}
+          disabled={myPartnerName.length === 0 || partnerPrincipleText.length === 0}
         />
 
         <Button
@@ -84,7 +98,12 @@ export const Form = () => {
           variant="secondary"
           text="Get Connected"
           sx={buttonStyles}
-          disabled={isGetConnectedButtonDisabled || myName.length === 0 || partnerPrincipleText.length === 0}
+          disabled={
+            isGetConnectedButtonDisabled ||
+            myName.length === 0 ||
+            myPartnerName.length === 0 ||
+            partnerPrincipleText.length === 0
+          }
         />
       </form>
     </CeremonyContainer>

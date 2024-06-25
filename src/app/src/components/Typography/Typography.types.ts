@@ -14,6 +14,17 @@ export enum FontFamily {
 
 export type FontFamilyTypes = 'Inter' | 'Poppins' | 'PPMori';
 
-export type TypographyVariants = 'h1' | 'h2' | 'h3' | 'body' | 'subtitle1' | 'subtitle2' | 'button' | 'label';
+export type TypographyVariants =
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6'
+  | 'body'
+  | 'subtitle1'
+  | 'subtitle2'
+  | 'button'
+  | 'label';
 
 export type TypographyColors = 'black' | 'white' | 'gray' | 'error' | 'success' | 'accent' | 'grey' | 'transparent';

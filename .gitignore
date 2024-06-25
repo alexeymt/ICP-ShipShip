@@ -33,3 +33,4 @@ package-lock.json
 deps
 .yarn
 /src/declarations
+/target

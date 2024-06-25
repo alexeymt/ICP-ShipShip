@@ -24,6 +24,11 @@ export const styles = {
     fontSize: 36,
     lineHeight: '40px',
   },
+  h3: {
+    fontWeight: FontWeights.Regular,
+    fontSize: 20,
+    lineHeight: '30px',
+  },
   subtitle1: {
     fontWeight: FontWeights.Regular,
     fontSize: 24,

@@ -23,4 +23,12 @@ export const routes = {
     root: '/choose-rings',
     title: 'choose rings',
   },
+  invitation: {
+    root: '/invitation',
+    title: 'invitation',
+  },
+  reject: {
+    root: '/reject',
+    title: 'reject',
+  },
 };
