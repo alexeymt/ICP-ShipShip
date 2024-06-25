@@ -9,7 +9,15 @@ import { Typography } from '../Typography';
 import { COPY_TEXT_SHOW_TIME, copyText as copyTextHelpers } from './Copyable.helper';
 import { CopyableProps } from './Copyable.types';
 
-export const Copyable = ({ copyText, displayText, withIcon = false, onClick, popoverRef, sx }: CopyableProps) => {
+export const Copyable = ({
+  copyText,
+  displayText,
+  disabled = false,
+  withIcon = false,
+  onClick,
+  popoverRef,
+  sx,
+}: CopyableProps) => {
   const [helperText, setHelperText] = useState(displayText);
 
   const handleCopyText: MouseEventHandler<HTMLButtonElement> = useCallback(
@@ -50,11 +58,13 @@ export const Copyable = ({ copyText, displayText, withIcon = false, onClick, pop
       <Typography variant="button" color="white">
         {helperText}
       </Typography>
-      <CopyToClipboard text={copyText}>
-        <button aria-label="copy" type="button" onClick={handleCopyText}>
-          <Icon type="copy" width={28} />
-        </button>
-      </CopyToClipboard>
+      {!disabled && (
+        <CopyToClipboard text={copyText}>
+          <button aria-label="copy" type="button" onClick={handleCopyText}>
+            <Icon type="copy" width={28} />
+          </button>
+        </CopyToClipboard>
+      )}
     </div>
   );
 };

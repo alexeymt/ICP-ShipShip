@@ -23,6 +23,7 @@ export const ChooseRing = () => {
   const handleRingChoose = (index: number) => {
     setCurrentSlide(index);
   };
+
   const handleProceed = () => {
     console.log(currentSlide);
   };
