@@ -6,13 +6,17 @@ import {useEffect, useState} from 'react';
 export const Version = () => {
     const {weddingActor, nftActor, principal} = useStore();
     const [backendVersion, setBackendVersion] = useState('');
+    const [mintResult, setMintResult] = useState('');
 
     useEffect(() => {
         async function getBackendVersion() {
             await weddingActor.getAppVersion()
                 .then(x => setBackendVersion(x));
             await nftActor.mintDip721(principal, [], [])
-                .then(x => console.log("name: " + JSON.stringify(x)));
+                .then(x => {
+                    setMintResult(JSON.stringify(x))
+                    console.log("name: " + JSON.stringify(x))
+                });
         }
 
         getBackendVersion();
@@ -20,7 +24,7 @@ export const Version = () => {
 
     return (
         <div>
-            <GradientTypography variant="h1">Backend: {backendVersion}</GradientTypography>
+            <GradientTypography variant="h1">Backend: {backendVersion}, mintResult: {mintResult}</GradientTypography>
         </div>
     );
 };
