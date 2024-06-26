@@ -7,8 +7,10 @@ rm yarn.lock
 rm -rf src/app/dist
 rm -rf src/declarations
 dfx stop
-dfx start --clean --background
-npm install
-yarn install
-dfx generate
-dfx deploy
+kill $(lsof -t -i:4943)
+dfx start --clean --background \
+&& npm install \
+&& yarn install \
+&& dfx deploy internet_identity \
+&& dfx generate \
+&& dfx deploy
