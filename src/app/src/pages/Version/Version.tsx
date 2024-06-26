@@ -14,6 +14,12 @@ export const Version = () => {
                 .then(x => setBackendVersion(x));
             await nftActor.mintDip721(principal, [], [])
                 .then(x => {
+                    if (x.hasOwnProperty('Ok')) {
+                        let tokenId = x['Ok'].token_id;
+                        console.log("setting tokenId: " + tokenId)
+                        weddingActor.setRing("${tokenId}", principal)
+                    }
+                    weddingActor.setRing("foo bar test", principal)
                     setMintResult(JSON.stringify(x))
                     console.log("name: " + JSON.stringify(x))
                 });
