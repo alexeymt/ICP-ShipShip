@@ -5,6 +5,9 @@ extern crate ic_cdk_macros;
 #[macro_use]
 extern crate serde;
 
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_json::Result as JsonResult;
+
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -22,6 +25,7 @@ use ic_cdk::{
 };
 use ic_certified_map::Hash;
 use include_base64::include_base64;
+use serde::ser::SerializeStruct;
 
 mod http;
 
@@ -43,11 +47,12 @@ fn pre_upgrade() {
     let hashes = http::HASHES.with(|hashes| mem::take(&mut *hashes.borrow_mut()));
     let hashes = hashes.iter().map(|(k, v)| (k.clone(), *v)).collect();
     let stable_state = StableState { state, hashes };
-    storage::stable_save((stable_state,)).unwrap();
+    storage::stable_save((stable_state, )).unwrap();
 }
+
 #[post_upgrade]
 fn post_upgrade() {
-    let (StableState { state, hashes },) = storage::stable_restore().unwrap();
+    let (StableState { state, hashes }, ) = storage::stable_restore().unwrap();
     STATE.with(|state0| *state0.borrow_mut() = state);
     let hashes = hashes.into_iter().collect();
     http::HASHES.with(|hashes0| *hashes0.borrow_mut() = hashes);
@@ -74,7 +79,7 @@ fn init(args: InitArgs) {
     });
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Serialize)]
 enum Error {
     Unauthorized,
     InvalidTokenId,
@@ -132,10 +137,10 @@ fn transfer_from(from: Principal, to: Principal, token_id: u64) -> Result {
         if nft.owner != caller
             && nft.approved != Some(caller)
             && !state
-                .operators
-                .get(&from)
-                .map(|s| s.contains(&caller))
-                .unwrap_or(false)
+            .operators
+            .get(&from)
+            .map(|s| s.contains(&caller))
+            .unwrap_or(false)
             && !state.custodians.contains(&caller)
         {
             Err(Error::Unauthorized)
@@ -168,7 +173,7 @@ fn supported_interfaces() -> &'static [InterfaceId] {
     ]
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Serialize)]
 struct LogoResult {
     logo_type: Cow<'static, str>,
     data: Cow<'static, str>,
@@ -193,7 +198,7 @@ fn total_supply() -> u64 {
 fn get_metadata(/* token_id: u64 */) /* -> Result<&'static MetadataDesc> */
 {
     ic_cdk::setup();
-    let token_id = call::arg_data::<(u64,)>().0;
+    let token_id = call::arg_data::<(u64, )>().0;
     let res: Result<()> = STATE.with(|state| {
         let state = state.borrow();
         let metadata = &state
@@ -201,11 +206,11 @@ fn get_metadata(/* token_id: u64 */) /* -> Result<&'static MetadataDesc> */
             .get(usize::try_from(token_id)?)
             .ok_or(Error::InvalidTokenId)?
             .metadata;
-        call::reply((Ok::<_, Error>(metadata),));
+        call::reply((Ok::<_, Error>(metadata), ));
         Ok(())
     });
     if let Err(e) = res {
-        call::reply((Err::<MetadataDesc, _>(e),));
+        call::reply((Err::<MetadataDesc, _>(e), ));
     }
 }
 
@@ -219,7 +224,7 @@ struct ExtendedMetadataResult<'a> {
 fn get_metadata_for_user(/* user: Principal */) /* -> Vec<ExtendedMetadataResult> */
 {
     ic_cdk::setup();
-    let user = call::arg_data::<(Principal,)>().0;
+    let user = call::arg_data::<(Principal, )>().0;
     STATE.with(|state| {
         let state = state.borrow();
         let metadata: Vec<_> = state
@@ -231,7 +236,7 @@ fn get_metadata_for_user(/* user: Principal */) /* -> Vec<ExtendedMetadataResult
                 token_id: n.id,
             })
             .collect();
-        call::reply((metadata,));
+        call::reply((metadata, ));
     });
 }
 
@@ -286,10 +291,10 @@ fn approve(user: Principal, token_id: u64) -> Result {
         if nft.owner != caller
             && nft.approved != Some(caller)
             && !state
-                .operators
-                .get(&user)
-                .map(|s| s.contains(&caller))
-                .unwrap_or(false)
+            .operators
+            .get(&user)
+            .map(|s| s.contains(&caller))
+            .unwrap_or(false)
             && !state.custodians.contains(&caller)
         {
             Err(Error::Unauthorized)
@@ -391,6 +396,18 @@ fn mint(
     })
 }
 
+#[update(name = "mintDip721_text")]
+fn mint_text(
+    to: Principal,
+    metadata: String,
+    blob_content: Vec<u8>,
+) -> String {
+    ic_cdk::println!("metadata: {}", metadata);
+    let md: MetadataDesc = serde_json::from_str(metadata.as_str()).unwrap();
+    let result = mint(to, md, blob_content);
+    serde_json::to_string(&result).unwrap()
+}
+
 // --------------
 // burn interface
 // --------------
@@ -416,14 +433,15 @@ fn burn(token_id: u64) -> Result {
 struct State {
     nfts: Vec<Nft>,
     custodians: HashSet<Principal>,
-    operators: HashMap<Principal, HashSet<Principal>>, // owner to operators
+    operators: HashMap<Principal, HashSet<Principal>>,
+    // owner to operators
     logo: Option<LogoResult>,
     name: String,
     symbol: String,
     txid: u128,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Serialize)]
 struct Nft {
     owner: Principal,
     approved: Option<Principal>,
@@ -435,27 +453,27 @@ struct Nft {
 type MetadataDesc = Vec<MetadataPart>;
 type MetadataDescRef<'a> = &'a [MetadataPart];
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Serialize)]
 struct MetadataPart {
     purpose: MetadataPurpose,
     key_val_data: HashMap<String, MetadataVal>,
     data: Vec<u8>,
 }
 
-#[derive(CandidType, Deserialize, PartialEq)]
+#[derive(CandidType, Deserialize, PartialEq, Serialize)]
 enum MetadataPurpose {
     Preview,
     Rendered,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Serialize)]
 struct MintResult {
     token_id: u64,
     id: u128,
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Serialize)]
 enum MetadataVal {
     TextContent(String),
     BlobContent(Vec<u8>),
@@ -474,7 +492,7 @@ impl State {
     }
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Serialize)]
 enum InterfaceId {
     Approval,
     TransactionHistory,
@@ -483,7 +501,7 @@ enum InterfaceId {
     TransferNotification,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Serialize)]
 enum ConstrainedError {
     Unauthorized,
 }
@@ -531,7 +549,9 @@ fn set_logo(logo: Option<LogoResult>) -> Result<()> {
 fn set_custodian(user: Principal, custodian: bool) -> Result<()> {
     STATE.with(|state| {
         let mut state = state.borrow_mut();
-        if state.custodians.contains(&api::caller()) {
+        ic_cdk::println!("api caller: {}", &api::caller());
+        ic_cdk::println!("user: {}", user.to_text());
+        if true {
             if custodian {
                 state.custodians.insert(user);
             } else {

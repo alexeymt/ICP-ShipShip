@@ -1,6 +1,6 @@
 type OwnerResult = variant {
     Err : ApiError;
-    Ok : principal;
+    _Ok : principal;
 };
 type ApiError = variant {
     Unauthorized;
@@ -9,7 +9,7 @@ type ApiError = variant {
     Other;
 };
 type TxReceipt = variant {
-    Ok : nat;
+    _Ok : nat;
     Err : ApiError;
 };
 type InterfaceId = variant {
@@ -28,7 +28,7 @@ type ExtendedMetadataResult = record {
     token_id : nat64;
 };
 type MetadataResult = variant {
-    Ok : MetadataDesc;
+    _Ok : MetadataDesc;
     Err : ApiError;
 };
 type MetadataDesc = vec MetadataPart;
@@ -90,7 +90,7 @@ type MintReceipt = variant {
     Err : variant {
         Unauthorized;
     };
-    Ok : record {
+    _Ok : record {
         token_id : nat64;
         id : nat;
     };
@@ -108,7 +108,7 @@ type InitArgs = record {
 };
 
 type ManageResult = variant {
-    Ok;
+    _Ok;
     Err : ApiError;
 };
 
@@ -144,6 +144,7 @@ service : (InitArgs) -> {
     getApprovedDip721 : (token_id : nat64) -> (TxReceipt) query;
     isApprovedForAllDip721 : (operator : principal) -> (bool) query;
     mintDip721 : (to : principal, metadata : MetadataDesc, blobContent : blob) -> (MintReceipt);
+    mintDip721_text : (to : principal, metadata : text, blobContent : blob) -> (text);
     burnDip721 : (token_id : nat64) -> (TxReceipt);
 
     set_name : (name : text) -> (ManageResult);
