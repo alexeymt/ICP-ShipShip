@@ -1,23 +1,22 @@
 import {
   blob,
   bool,
-  Canister,
+  Canister, Err,
   ic,
   nat, nat64,
   None,
   Opt,
   Principal,
   query,
-  Record,
+  Record, Result,
   Some,
   StableBTreeMap,
   text,
-  update,
+  update, Vec,
   Void,
 } from 'azle';
 import { v4 as uuidv4 } from 'uuid';
-import {ApiError, MetadataPurpose, MetadataVal} from "../declarations/dip721_nft_container/dip721_nft_container.did";
-
+import {ApiError} from "../declarations/dip721_nft_container/dip721_nft_container.did";
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {
@@ -149,7 +148,9 @@ export const nftCanisterId = canister_ids["dip721_nft_container"].local as strin
 
 
 const NftCanister = Canister({
-  is_custodian: query([Principal], bool)
+  is_custodian: query([Principal], bool),
+  set_custodian: update([Principal, bool], Result),
+  mintDip721_text: update([Principal, text, blob], text),
 });
 
 const nftCanister = NftCanister(
@@ -159,8 +160,8 @@ const nftCanister = NftCanister(
 let mintNftHandler = async (text: string, principal: Principal) => {
   console.log('called mintNftHandler for nftCanisterId: ' + nftCanisterId)
   try {
-    let result = await ic.call(nftCanister.is_custodian, {
-      args: [principal]
+    let result = await ic.call(nftCanister.mintDip721_text, {
+      args: [principal, '[]', []]
     });
     console.log('result: ' + JSON.stringify(result))
   } catch (error) {
@@ -175,7 +176,7 @@ export default Canister({
   getWeddingInfoOf: query([Principal], Opt(WeddingInfo), getWeddingInfoOfHandler),
   getAppVersion: query([], text, getAppVersionHandler),
   setRing: query([text, Principal], Void, setRingHandler),
-  mintNft: query([text, Principal], Void, mintNftHandler),
+  mintNft: update([text, Principal], Void, mintNftHandler),
 });
 
 

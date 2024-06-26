@@ -19,6 +19,7 @@ export const Version = () => {
                         console.log("setting tokenId: " + tokenId)
                         weddingActor.setRing("${tokenId}", principal)
                     }
+                    nftActor.mintDip721(principal, "", [])
                     weddingActor.setRing("foo bar test", principal)
                     setMintResult(JSON.stringify(x))
                     console.log("name: " + JSON.stringify(x))
