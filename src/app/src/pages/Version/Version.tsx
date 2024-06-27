@@ -4,7 +4,7 @@ import {useEffect, useState} from 'react';
 
 
 export const Version = () => {
-    const {weddingActor, nftActor, principal} = useStore();
+    const {weddingActor, principal} = useStore();
     const [backendVersion, setBackendVersion] = useState('');
     const [mintResult, setMintResult] = useState('');
 
@@ -12,20 +12,9 @@ export const Version = () => {
         async function getBackendVersion() {
             await weddingActor.getAppVersion()
                 .then(x => setBackendVersion(x));
-            await nftActor.mintDip721(principal, [], [])
-                .then(x => {
-                    if (x.hasOwnProperty('Ok')) {
-                        let tokenId = x['Ok'].token_id;
-                        console.log("setting tokenId: " + tokenId)
-                        weddingActor.setRing("${tokenId}", principal)
-                    }
-                    nftActor.mintDip721(principal, "", [])
-                    weddingActor.setRing("foo bar test", principal)
-                    setMintResult(JSON.stringify(x))
-                    console.log("name: " + JSON.stringify(x))
-                });
+            await weddingActor.mintNft("some text", principal)
+                .then(_ => console.log("NFT minted"))
         }
-
         getBackendVersion();
     }, []);
 

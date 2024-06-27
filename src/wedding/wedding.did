@@ -1,9 +1,29 @@
-service: () -> {
+type Partner = record {
+    id: principal;
+    name: opt text;
+    wedding: text;
+    isAgreed: bool;
+};
+
+type Ring = record {
+    nftTokenId: nat;
+    assetId: text;
+};
+
+type Wedding = record {
+    id: text;
+    hadAt: nat;
+    partner1: Partner;
+    ring1: opt Ring;
+    partner2: Partner;
+    ring2: opt Ring;
+};
+
+service : () -> {
     agreeToMarry: () -> ();
     getAppVersion: () -> (text) query;
-    getPartnerInfo: (principal) -> (opt record {id:principal; name:opt text; wedding:text; isAgreed:bool}) query;
-    getWeddingInfoOf: (principal) -> (opt record {id:text; hadAt:nat; partner1:record {id:principal; name:opt text; wedding:text; isAgreed:bool}; partner2:record {id:principal; name:opt text; wedding:text; isAgreed:bool}}) query;
+    getPartnerInfo: (principal) -> (opt Partner) query;
+    getWeddingInfoOf: (principal) -> (opt Wedding) query;
     matchPartner: (text, principal) -> ();
     mintNft: (text, principal) -> ();
-    setRing: (text, principal) -> () query;
 }

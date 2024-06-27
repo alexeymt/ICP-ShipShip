@@ -16,7 +16,6 @@ import {
   Void,
 } from 'azle';
 import { v4 as uuidv4 } from 'uuid';
-import {ApiError} from "../declarations/dip721_nft_container/dip721_nft_container.did";
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {

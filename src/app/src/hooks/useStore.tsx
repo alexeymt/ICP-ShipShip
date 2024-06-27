@@ -7,9 +7,6 @@ import { Principal } from '@dfinity/principal';
 import { canisterId as weddingCanisterId, createActor as createWeddingActor } from '../../../declarations/wedding';
 import { _SERVICE as _WEDDING_SERVICE } from '../../../declarations/wedding/wedding.did';
 
-import { canisterId as nftCanisterId, createActor as createNftActor } from '../../../declarations/dip721_nft_container';
-import { _SERVICE as _NFT_SERVICE } from '../../../declarations/dip721_nft_container/dip721_nft_container.did';
-
 const  IS_LOCAL = process.env.DFX_NETWORK === 'local';
 
 const defaultOptions: {
@@ -35,7 +32,6 @@ const useStore_ = (options = defaultOptions) => {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [principal, setPrincipal] = useState<Principal | null>(null);
   const [weddingActor, setWeddingActor] = useState<ActorSubclass<_WEDDING_SERVICE> | null>(null);
-  const [nftActor, setNftActor] = useState<ActorSubclass<_NFT_SERVICE> | null>(null);
 
   const getWeddingInfoInterval = useRef<number>();
   const [weddingInfo, setWeddingInfo] = useState<Awaited<ReturnType<_WEDDING_SERVICE['getWeddingInfoOf']>>[0] | null>();
@@ -77,14 +73,6 @@ const useStore_ = (options = defaultOptions) => {
     });
 
     setWeddingActor(weddingActor_);
-
-    const nftActor_ = createNftActor(nftCanisterId, {
-      agentOptions: {
-        identity: identity_,
-      },
-    });
-
-    setNftActor(nftActor_);
 
     window.clearInterval(getWeddingInfoInterval.current);
     getWeddingInfoInterval.current = window.setInterval(async () => {
@@ -139,7 +127,6 @@ const useStore_ = (options = defaultOptions) => {
     identity: identity!,
     principal: principal!,
     weddingActor: weddingActor!,
-    nftActor: nftActor!,
     handleGetWeddingInfo,
     weddingInfo,
     myPartnerInfo,
