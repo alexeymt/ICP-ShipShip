@@ -13,6 +13,6 @@ dfx start --clean --background \
 && yarn install \
 && dfx deploy internet_identity \
 && dfx generate \
+&& dfx deploy dip721_nft_container --specified-id br5f7-7uaaa-aaaaa-qaaca-cai \
 && dfx deploy app \
-&& dfx deploy dip721_nft_container \
-&& dfx deploy wedding --specified-id br5f7-7uaaa-aaaaa-qaaca-cai
+&& dfx deploy wedding --specified-id bw4dl-smaaa-aaaaa-qaacq-cai

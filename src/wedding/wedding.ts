@@ -38,15 +38,24 @@ const Partner = Record({
   isAgreed: bool,
 });
 
+const Ring = Record({
+  token_id: nat64,
+  data: text
+})
+
 const WeddingInfo = Record({
   ...weddingRecord,
   partner1: Partner,
+  ring1: Ring,
   partner2: Partner,
+  ring2: Ring
 });
 
 let weddings = StableBTreeMap(text, Wedding, 1)!;
 
 let partners = StableBTreeMap(Principal, Partner, 2)!;
+
+let rings = StableBTreeMap(Principal, Ring, 3)!;
 
 let agreeToMarryHandler = () => {
   const partnersOpt = partners.get(ic.caller());
@@ -85,6 +94,7 @@ let matchPartnerHandler = (myName, partnerPrincipal) => {
       id: ic.caller(),
       name: Some(myName),
       wedding: wedding.id,
+      ring: None,
       isAgreed: false,
     };
     partners.insert(partner1.id, partner1);
@@ -92,6 +102,7 @@ let matchPartnerHandler = (myName, partnerPrincipal) => {
       id: partnerPrincipal,
       name: None,
       wedding: wedding.id,
+      ring: None,
       isAgreed: false,
     };
     partners.insert(partner2.id, partner2);
@@ -114,6 +125,8 @@ let getWeddingInfoOfHandler = (partnerPrinciple) => {
 
   let partner1: typeof Partner;
   let partner2: typeof Partner;
+  let ring1: typeof Ring;
+  let ring2: typeof Ring;
   if (partnerPrinciple.compareTo(wedding.partner1) === 'eq') {
     partner1 = partner;
     partner2 = partners.get(wedding.partner2).Some!;
@@ -121,8 +134,10 @@ let getWeddingInfoOfHandler = (partnerPrinciple) => {
     partner2 = partner;
     partner1 = partners.get(wedding.partner1).Some!;
   }
+  ring1 = rings.get(partner1.id).Some!
+  ring2 = rings.get(partner2.id).Some!
   return Some(
-      { ...wedding, partner1, partner2 }, // as any
+      { ...wedding, partner1, ring1, partner2, ring2}, // as any
   );
 };
 
@@ -148,6 +163,7 @@ export const nftCanisterId = canister_ids["dip721_nft_container"].local as strin
 
 const NftCanister = Canister({
   is_custodian: query([Principal], bool),
+  // DO NOT REMOVE! REMOVING THIS USELESS METHOD WILL BREAK THE NEXT METHOD CALL
   set_custodian: update([Principal, bool], Result),
   mintDip721_text: update([Principal, text, blob], text),
 });
@@ -158,11 +174,29 @@ const nftCanister = NftCanister(
 
 let mintNftHandler = async (text: string, principal: Principal) => {
   console.log('called mintNftHandler for nftCanisterId: ' + nftCanisterId)
+  let u8arr = Uint8Array.from(Buffer.from(text))
+  let str = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
+  console.log('str: ' + str)
   try {
+    let maybeRing = rings.get(principal)
+    if ('None' !in maybeRing) {
+      console.log('ring already exists, token_id: ' + maybeRing.Some!.token_id)
+    }
     let result = await ic.call(nftCanister.mintDip721_text, {
-      args: [principal, '[]', []]
+      args: [principal, str, []]
     });
     console.log('result: ' + JSON.stringify(result))
+    let obj = JSON.parse((result as String).toString());
+    if (obj.hasOwnProperty("Err")) {
+      console.log("error!")
+      return
+    }
+    let tokenId = obj["Ok"]["token_id"];
+    const ring: typeof Ring = {
+      token_id: BigInt(tokenId),
+      data: text
+    }
+    rings.insert(principal, ring)
   } catch (error) {
     console.log(error);
   }
