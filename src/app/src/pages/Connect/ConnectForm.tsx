@@ -42,6 +42,11 @@ export const Form = () => {
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
+      if (principal.toString() === partnerPrincipleText) {
+        toast.error("Unable to use the same partner's ID as yours");
+        return;
+      }
+
       let partnerPrinciple: Principal;
       try {
         partnerPrinciple = Principal.fromText(partnerPrincipleText);
@@ -53,7 +58,7 @@ export const Form = () => {
 
       setIsGetConnectedButtonDisabled(true);
       try {
-        await weddingActor.matchPartner(myName, partnerPrinciple);
+        await weddingActor.matchPartner(myName, partnerPrinciple, myPartnerName);
       } catch (error) {
         toast.error(`Unable to match a partner due to error: ${JSON.stringify(error)}`);
         setIsGetConnectedButtonDisabled(false);
@@ -62,7 +67,7 @@ export const Form = () => {
       await handleGetWeddingInfo();
       toast.success('Matched successfully');
 
-      navigate(routes.ceremony.root);
+      navigate(routes.choose.root);
     },
     [myName, partnerPrincipleText, navigate, weddingActor, handleGetWeddingInfo],
   );
@@ -89,7 +94,7 @@ export const Form = () => {
         <ShareLink
           title="Invite your partner to connect"
           description="Share link:"
-          link={`/invitation?partnerName=${myPartnerName}&principal=${principal}`}
+          link={`/invitation?partnerName=${myPartnerName}`}
           disabled={myPartnerName.length === 0 || partnerPrincipleText.length === 0}
         />
 

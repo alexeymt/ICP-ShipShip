@@ -31,4 +31,12 @@ export const routes = {
     root: '/reject',
     title: 'reject',
   },
+  waiting: {
+    root: '/waiting',
+    title: 'waiting',
+  },
+  payment: {
+    root: '/payment',
+    title: 'payment',
+  },
 };

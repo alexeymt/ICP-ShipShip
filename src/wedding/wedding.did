@@ -1,7 +1,10 @@
 service: () -> {
     agreeToMarry: () -> ();
     getAppVersion: () -> (text) query;
-    getPartnerInfo: (principal) -> (opt record {id:principal; name:opt text; wedding:text; isAgreed:bool}) query;
-    getWeddingInfoOf: (principal) -> (opt record {id:text; hadAt:nat; partner1:record {id:principal; name:opt text; wedding:text; isAgreed:bool}; partner2:record {id:principal; name:opt text; wedding:text; isAgreed:bool}}) query;
-    matchPartner: (text, principal) -> ();
+    getPartnerInfo: (principal) -> (opt record {id:principal; isRejected:bool; name:opt text; isPaid:bool; wedding:text; isAgreed:bool; isWaiting:bool}) query;
+    getWeddingInfoOf: (principal) -> (opt record {id:text; hadAt:nat; partner1:record {id:principal; isRejected:bool; name:opt text; isPaid:bool; wedding:text; isAgreed:bool; isWaiting:bool}; partner2:record {id:principal; isRejected:bool; name:opt text; isPaid:bool; wedding:text; isAgreed:bool; isWaiting:bool}}) query;
+    matchPartner: (text, principal, text) -> ();
+    rejectMarry: () -> ();
+    setPartnerPaid: () -> ();
+    setPartnerWaiting: () -> ();
 }

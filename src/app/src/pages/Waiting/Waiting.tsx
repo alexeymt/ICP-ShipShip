@@ -8,8 +8,9 @@ import { useStore } from '../../hooks';
 import { CeremonyContainer, GradientTypography } from '../../styles';
 import { sleep } from '../../utils';
 import { PrivateRoute } from '../../auth';
+import { isYieldExpression } from 'typescript';
 
-export const Ceremony = () => {
+export const Waiting = () => {
   const navigate = useNavigate();
   const { myPartnerInfo, otherPartnerInfo, weddingActor } = useStore();
   const [isAgreeToMerryDisabled, setIsAgreeToMerryDisabled] = useState(false);
@@ -30,6 +31,7 @@ export const Ceremony = () => {
     toast.success('You have been married');
     navigate(routes.certificate.root);
   }, [navigate]);
+  isYieldExpression;
 
   useEffect(() => {
     if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {

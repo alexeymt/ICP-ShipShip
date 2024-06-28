@@ -7,7 +7,7 @@ import { Principal } from '@dfinity/principal';
 import { canisterId as weddingCanisterId, createActor as createWeddingActor } from '../../../declarations/wedding';
 import { _SERVICE as _WEDDING_SERVICE } from '../../../declarations/wedding/wedding.did';
 
-const  IS_LOCAL = process.env.DFX_NETWORK === 'local';
+const IS_LOCAL = process.env.DFX_NETWORK === 'local';
 
 const defaultOptions: {
   createOptions: AuthClientCreateOptions;
@@ -130,6 +130,7 @@ const useStore_ = (options = defaultOptions) => {
     weddingInfo,
     myPartnerInfo,
     otherPartnerInfo,
+    updateClient,
   };
 };
 
