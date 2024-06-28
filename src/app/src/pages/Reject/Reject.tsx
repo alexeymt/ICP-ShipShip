@@ -1,11 +1,11 @@
 import styled from '@emotion/styled';
-import { useSearchParams } from 'react-router-dom';
 import { CeremonyContainer } from '../../styles';
 import { Typography } from '../../components';
+import { useStore } from '../../hooks';
+import { useEffect } from 'react';
 
 export const Reject = () => {
-  const [searchParams] = useSearchParams();
-  const partnerName = searchParams.get('partnerName');
+  const { myPartnerInfo, weddingActor } = useStore();
 
   const ContentWrapper = styled.div({
     display: 'flex',
@@ -15,6 +15,12 @@ export const Reject = () => {
     minHeight: '60vh',
   });
 
+  useEffect(() => {
+    if (myPartnerInfo?.name) {
+      weddingActor.rejectMarry();
+    }
+  }, [myPartnerInfo?.name, weddingActor]);
+
   const StyledTypography = styled(Typography)({
     marginTop: '30px',
   });
@@ -23,10 +29,10 @@ export const Reject = () => {
     <CeremonyContainer>
       <ContentWrapper>
         <Typography align="center" variant="h3" color="black">
-          {`No worries, ${partnerName}!`}
+          {`No worries${myPartnerInfo?.name ? ', ' : ''}${myPartnerInfo?.name || ''}! 💔 `}
         </Typography>
         <StyledTypography align="center" variant="h3" color="black">
-          💔 Sometimes things don't go as planned, but who knows what the future holds?{' '}
+          Sometimes things don't go as planned, but who knows what the future holds?{' '}
         </StyledTypography>
         <StyledTypography align="center" variant="h3" color="black">
           Stay awesome! 🌟✨

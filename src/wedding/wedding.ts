@@ -34,7 +34,10 @@ const Partner = Record({
   id: Principal,
   name: Opt(text),
   wedding: text,
+  isWaiting: bool,
   isAgreed: bool,
+  isRejected: bool,
+  isPaid: bool,
 });
 
 const WeddingInfo = Record({
@@ -48,7 +51,7 @@ let weddings = StableBTreeMap(text, Wedding, 1)!;
 let partners = StableBTreeMap(Principal, Partner, 2)!;
 
 export default Canister({
-  matchPartner: update([text, Principal], Void, (myName, partnerPrincipal) => {
+  matchPartner: update([text, Principal, text], Void, (myName, partnerPrincipal, partnerName) => {
     const partnersOpt = partners.get(ic.caller());
     // match
     if ('None' in partnersOpt) {
@@ -63,14 +66,20 @@ export default Canister({
         id: ic.caller(),
         name: Some(myName),
         wedding: wedding.id,
+        isWaiting: false,
         isAgreed: false,
+        isRejected: false,
+        isPaid: false,
       };
       partners.insert(partner1.id, partner1);
       const partner2 = {
         id: partnerPrincipal,
-        name: None,
+        name: Some(partnerName),
         wedding: wedding.id,
+        isWaiting: false,
         isAgreed: false,
+        isRejected: false,
+        isPaid: false,
       };
       partners.insert(partner2.id, partner2);
     } else {
@@ -80,6 +89,55 @@ export default Canister({
       partners.insert(partner.id, partner);
     }
   }),
+
+  rejectMarry: update([], Void, () => {
+    const partnersOpt = partners.get(ic.caller());
+    if ('None' in partnersOpt) {
+      ic.trap('Match method not called');
+      return;
+    }
+    const partner = partnersOpt.Some;
+    if ('None' in partner.name) {
+      ic.trap('Match method not called');
+      return;
+    }
+
+    partner.isRejected = true;
+    partners.insert(partner.id, partner);
+  }),
+
+  setPartnerWaiting: update([], Void, () => {
+    const partnersOpt = partners.get(ic.caller());
+    if ('None' in partnersOpt) {
+      ic.trap('Please call a match method first');
+      return;
+    }
+    const partner = partnersOpt.Some;
+    if ('None' in partner.name) {
+      ic.trap('Please call a match method first to accept');
+      return;
+    }
+
+    partner.isWaiting = true;
+    partners.insert(partner.id, partner);
+  }),
+
+  setPartnerPaid: update([], Void, () => {
+    const partnersOpt = partners.get(ic.caller());
+    if ('None' in partnersOpt) {
+      ic.trap('Please call a match method first');
+      return;
+    }
+    const partner = partnersOpt.Some;
+    if ('None' in partner.name) {
+      ic.trap('Please call a match method first to accept');
+      return;
+    }
+
+    partner.isPaid = true;
+    partners.insert(partner.id, partner);
+  }),
+
   agreeToMarry: update([], Void, () => {
     const partnersOpt = partners.get(ic.caller());
     if ('None' in partnersOpt) {
@@ -105,6 +163,7 @@ export default Canister({
   getPartnerInfo: query([Principal], Opt(Partner), (partnerPrincipal) => {
     return partners.get(partnerPrincipal);
   }),
+
   getWeddingInfoOf: query([Principal], Opt(WeddingInfo), (partnerPrinciple) => {
     const partnerOpt = partners.get(partnerPrinciple);
     if ('None' in partnerOpt) {
@@ -127,9 +186,10 @@ export default Canister({
       { ...wedding, partner1, partner2 }, // as any
     );
   }),
+
   getAppVersion: query([], text, () => {
-    const pj = require('./package.json')
-    return pj.version
+    const pj = require('./package.json');
+    return pj.version;
   }),
 });
 

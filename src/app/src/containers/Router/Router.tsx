@@ -1,11 +1,18 @@
 import { FC } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-
-import { Ceremony, Certificate, ChooseRing, Connect, Landing, Version } from '../../pages';
-
+import {
+  Ceremony,
+  Certificate,
+  ChooseRing,
+  Connect,
+  Invitation,
+  Landing,
+  Payment,
+  Reject,
+  Version,
+  Waiting,
+} from '../../pages';
 import { routes } from './routes';
-import { Invitation } from '../../pages/Invitation/Invitation';
-import { Reject } from '../../pages/Reject/Reject';
 
 export const LayoutRoutes: FC = () => {
   return (
@@ -19,6 +26,8 @@ export const LayoutRoutes: FC = () => {
       <Route path={routes.choose.root} element={<ChooseRing />} />
       <Route path={routes.invitation.root} element={<Invitation />} />
       <Route path={routes.reject.root} element={<Reject />} />
+      <Route path={routes.waiting.root} element={<Waiting />} />
+      <Route path={routes.payment.root} element={<Payment />} />
     </Routes>
   );
 };

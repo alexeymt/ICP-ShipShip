@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Typography } from '../../components';
 import { Slider } from '../../components/Slider';
 import styled from '@emotion/styled';
+import { useNavigate } from 'react-router';
+import { routes } from '../../containers';
+import { useStore } from '../../hooks';
 
 const Container = styled.div({
   height: 'calc(100vh - 220px)',
@@ -18,7 +21,15 @@ const ButtonWrapper = styled.div({
 });
 
 export const ChooseRing = () => {
+  const navigate = useNavigate();
+  const { otherPartnerInfo } = useStore();
   const [currentSlide, setCurrentSlide] = useState(3);
+
+  useEffect(() => {
+    if (otherPartnerInfo?.isRejected) {
+      navigate(routes.reject.root);
+    }
+  }, [otherPartnerInfo?.isRejected]);
 
   const handleRingChoose = (index: number) => {
     setCurrentSlide(index);
@@ -26,6 +37,8 @@ export const ChooseRing = () => {
 
   const handleProceed = () => {
     console.log(currentSlide);
+    // TODO: logic to create and add ring
+    navigate(routes.ceremony.root);
   };
 
   return (
