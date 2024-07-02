@@ -15,7 +15,7 @@ import {
   update, Vec,
   Void,
 } from 'azle';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {
@@ -25,49 +25,30 @@ BigInt.prototype.toJSON = function () {
 const weddingRecord = {
   id: text,
   partner1: Principal,
-  partner2: Principal,
+  partner2: Opt(Principal),
   hadAt: nat,
+  isRejected: bool
 };
 
 const Wedding = Record(weddingRecord);
-
-const Partner = Record({
-  id: Principal,
-  name: Opt(text),
-  wedding: Opt(text),
-  proposal: Opt(text),
-  isAgreed: bool,
-});
-
-const ProposalInput = Record({
-  proposerName: text,
-  proposeeName: text,
-})
-
-let proposalRecord = {
-  id: text,
-  proposerId: Principal,
-  proposeeName: text,
-  isAccepted: Opt(bool),
-};
-const Proposal = Record(proposalRecord)
-
-const ProposalInfo = Record ({
-  ...proposalRecord,
-  proposerPartner: Partner,
-})
 
 const Ring = Record({
   token_id: nat64,
   data: text
 })
 
+const Partner = Record({
+  id: Principal,
+  name: text,
+  wedding: text,
+  isAgreed: Opt(bool),
+  ring: Opt(Ring)
+});
+
 const WeddingInfo = Record({
   ...weddingRecord,
   partner1: Partner,
-  ring1: Ring,
-  partner2: Partner,
-  ring2: Ring
+  partner2: Opt(Partner),
 });
 
 let weddings = StableBTreeMap(text, Wedding, 1)!;
@@ -76,92 +57,31 @@ let partners = StableBTreeMap(Principal, Partner, 2)!;
 
 let rings = StableBTreeMap(Principal, Ring, 3)!;
 
-let proposalById = StableBTreeMap(text, Proposal, 4)!;
-let proposalByPrincipal = StableBTreeMap(Principal, text, 5)!;
-
-let agreeToMarryHandler = () => {
-  const partnersOpt = partners.get(ic.caller());
-  if ('None' in partnersOpt) {
-    ic.trap('Please call a match method first');
-    return;
-  }
-  const partner = partnersOpt.Some;
-  if ('None' in partner.name) {
-    ic.trap('Please call a match method first to accept');
-    return;
-  }
-
-  partner.isAgreed = true;
-  partners.insert(partner.id, partner);
-
-  // const wedding = weddings.get(partner.wedding).Some!;
-  // const partner2 = partners.get(wedding.partner2).Some!;
-  // if (partner2.isAgreed) {
-  //   // issue marriage certificate
-  // }
-};
-
-let matchPartnerHandler = (myName, partnerPrincipal) => {
-  const partnersOpt = partners.get(ic.caller());
-  // match
-  if ('None' in partnersOpt) {
-    const wedding: typeof Wedding = {
-      id: uuidv4(),
-      partner1: ic.caller(),
-      partner2: partnerPrincipal,
-      hadAt: ic.time(),
-    };
-    weddings.insert(wedding.id, wedding);
-    const partner1 = {
-      id: ic.caller(),
-      name: Some(myName),
-      proposal: None,
-      wedding: Some(wedding.id),
-      ring: None,
-      isAgreed: false,
-    };
-    partners.insert(partner1.id, partner1);
-    const partner2 = {
-      id: partnerPrincipal,
-      name: None,
-      proposal: None,
-      wedding: Some(wedding.id),
-      ring: None,
-      isAgreed: false,
-    };
-    partners.insert(partner2.id, partner2);
-  } else {
-    // accept match
-    const partner = partnersOpt.Some;
-    partner.name = Some(myName);
-    partners.insert(partner.id, partner);
-  }
-};
-
-let getWeddingInfoOfHandler = (principal) => {
-  const partnerOpt = partners.get(principal);
-  if ('None' in partnerOpt) {
+let getWeddingInfoHandler = (principal) => {
+  console.log(`getting wedding info`)
+  const maybePartner = partners.get(principal);
+  if ('None' in maybePartner) {
+    console.log('partner not found')
     return None;
   }
-  const partner = partnerOpt.Some;
-  const wedding = weddings.get(partner.wedding.Some!).Some!;
-  // console.log(`getWeddingInfoOf: wedding: ${JSON.stringify(wedding)}`);
+  const partner = maybePartner.Some;
+  const wedding = weddings.get(partner.wedding).Some!;
+  console.log(`getWeddingInfo: ${JSON.stringify(wedding)}`);
 
   let partner1: typeof Partner;
-  let partner2: typeof Partner;
-  let ring1: typeof Ring;
-  let ring2: typeof Ring;
+  let partner2: Opt<typeof Partner>;
   if (principal.compareTo(wedding.partner1) === 'eq') {
     partner1 = partner;
-    partner2 = partners.get(wedding.partner2).Some!;
+    if ('Some' in wedding.partner2) {
+      partner2 = partners.get(wedding.partner2.Some!);
+    }
   } else {
-    partner2 = partner;
+    partner2 = Some(partner);
     partner1 = partners.get(wedding.partner1).Some!;
   }
-  ring1 = rings.get(partner1.id).Some!
-  ring2 = rings.get(partner2.id).Some!
+
   return Some(
-      { ...wedding, partner1, ring1, partner2, ring2}, // as any
+    {...wedding, partner1, partner2}, // as any
   );
 };
 
@@ -173,52 +93,6 @@ let getAppVersionHandler = () => {
   const pj = require('./package.json')
   return pj.version
 };
-
-let createProposalHandler = (input) => {
-  const proposer = ic.caller();
-  let maybeProposalsByPrincipal = proposalByPrincipal.get(proposer);
-  if ('Some' in maybeProposalsByPrincipal) {
-    let proposalId = maybeProposalsByPrincipal.Some!;
-    console.log('proposal already exists with id: ' + proposalId)
-    try {
-      let maybeProposal = proposalById.get(proposalId)
-      console.log('proposal: ' + JSON.stringify(maybeProposal))
-      if ('None' in maybeProposal.Some!.isAccepted) {
-        console.log('but without acceptance status yet, new proposal would not be created'.toString())
-        return Some(proposalId)
-      }
-    } catch (error) {
-      console.log(error);
-      return None
-    }
-  }
-  let id = uuidv4();
-  console.log('proposal would be created with id: ' + id.toString())
-  const maybePartner = partners.get(proposer);
-  if ('None' in maybePartner) {
-    console.log("partner not found by principal: " + proposer.toText() + ", creating a new one...")
-    const partner = {
-      id: proposer,
-      name: Some(input.proposerName),
-      wedding: None,
-      proposal: Some(id),
-      ring: None,
-      isAgreed: false,
-    };
-    partners.insert(proposer, partner)
-    console.log("created partner: " + JSON.stringify(partner))
-  }
-  let proposal = {
-    id: id,
-    proposerId: proposer,
-    proposeeName: input.proposeeName,
-    isAccepted: None,
-  }
-  proposalById.insert(id, proposal)
-  proposalByPrincipal.insert(proposer, id)
-  console.log("created proposal: " + JSON.stringify(proposal))
-  return Some(id)
-}
 
 const canister_ids = require("../../.dfx/local/canister_ids.json");
 
@@ -233,7 +107,7 @@ const NftCanister = Canister({
 });
 
 const nftCanister = NftCanister(
-    Principal.fromText(nftCanisterId)
+  Principal.fromText(nftCanisterId)
 );
 
 let mintNftHandler = async (text: string, principal: Principal) => {
@@ -243,7 +117,7 @@ let mintNftHandler = async (text: string, principal: Principal) => {
   console.log('str: ' + str)
   try {
     let maybeRing = rings.get(principal)
-    if ('None' !in maybeRing) {
+    if ('None' ! in maybeRing) {
       console.log('ring already exists, token_id: ' + maybeRing.Some!.token_id)
     }
     let result = await ic.call(nftCanister.mintDip721_text, {
@@ -266,55 +140,168 @@ let mintNftHandler = async (text: string, principal: Principal) => {
   }
 };
 
-let getProposalByIdHandler = (text: string) => {
-  let maybeProposal = proposalById.get(text)
-  if ('None' in maybeProposal) {
-    return None
+const RejectProposalInput = Record({
+  weddingId: text
+})
+
+let rejectProposalHandler = (input) => {
+  console.log(`input: ${JSON.stringify(input)}`)
+  let weddingId = input.weddingId;
+  let maybeWedding = weddings.get(weddingId)
+  if ('None' in maybeWedding) {
+    console.log('wedding not found by id: ' + weddingId.toString())
+    return
   }
-  let proposal = maybeProposal.Some!
-  let proposerPartner = partners.get(proposal.proposerId).Some!
-  return Some({
-    ...proposal,
-    proposerPartner: proposerPartner
-  })
-}
-
-let rejectProposalHandler = (text: string) => {
-  changeProposalAcceptance(text, false)
-}
-
-let acceptProposalHandler = (text: string) => {
-  changeProposalAcceptance(text, true)
-}
-
-let changeProposalAcceptance = (text: string, isAccepted: boolean) => {
-  console.log('changing proposal : ' + text + ' acceptance to: ' + isAccepted)
-  let maybeProposal = proposalById.get(text)
-  if ('None' in maybeProposal) {
-    console.log('proposal not found')
+  let wedding = maybeWedding.Some!
+  if ('Some' in wedding.partner2) {
+    console.log('proposal is already accepted')
     return;
   }
-  let proposal = maybeProposal.Some!
-  if ('Some' in proposal.isAccepted) {
-    console.log('proposal already accepted or rejected: ' + proposal.isAccepted)
-    return;
+  wedding.isRejected = true;
+  weddings.insert(weddingId, wedding)
+  console.log('proposal is rejected')
+}
+
+const AcceptProposalInput = Record({
+  weddingId: text,
+  proposeeName: text
+})
+
+let acceptProposalHandler = (input) => {
+  console.log(`input: ${JSON.stringify(input)}`)
+  let principal = ic.caller();
+  let weddingId = input.weddingId;
+  let maybeWedding = weddings.get(weddingId)
+  if ('None' in maybeWedding) {
+    console.log('wedding not found by id: ' + weddingId.toString())
+    return
   }
-  proposal.isAccepted = Some(isAccepted)
-  proposalById.insert(proposal.id, proposal)
-  console.log('proposal acceptance status has  been hanged to: ' + isAccepted.valueOf())
+  let wedding = maybeWedding.Some!
+  if (wedding.partner1.compareTo(principal) === 'eq') {
+    console.log(`partner1 and partner2 are identical`)
+    //return;
+  }
+  const partner = {
+    id: principal,
+    name: input.proposeeName,
+    wedding: weddingId,
+    isAgreed: None,
+    ring: None
+  };
+  wedding.partner2 = Some(principal)
+  weddings.insert(weddingId, wedding)
+  partners.insert(principal, partner)
+  console.log('accepted!')
+}
+
+const CreateWeddingInput = Record({
+  proposerName: text,
+})
+
+let createWeddingHandler = (input) => {
+  console.log(`input: ${JSON.stringify(input)}`)
+  let principal = ic.caller();
+  console.log(`principal: ${principal.toString()}`)
+  let maybePartner = partners.get(principal);
+  if ('None' in maybePartner) {
+    const weddingId = uuidv4();
+    console.log("partner not found, creating one")
+    const partner = {
+      id: principal,
+      name: input.proposerName,
+      wedding: weddingId,
+      isAgreed: None,
+      ring: None
+    };
+    partners.insert(partner.id, partner);
+    console.log("wedding would be created: " + weddingId.toString())
+    const wedding: typeof Wedding = {
+      id: weddingId,
+      partner1: principal,
+      partner2: None,
+      hadAt: ic.time(),
+      isRejected: false
+    };
+    weddings.insert(weddingId, wedding)
+    return Some(weddingId)
+  } else {
+    // if wedding exist and is rejected - create new one
+    let partner = maybePartner.Some!
+    let wedding = weddings.get(partner.wedding).Some!
+    if (wedding.isRejected) {
+      const weddingId = uuidv4();
+      console.log(`wedding ${weddingId.toString()} would be created instead of rejected ${partner.wedding.toString()}`)
+      const wedding: typeof Wedding = {
+        id: weddingId,
+        partner1: principal,
+        partner2: None,
+        hadAt: ic.time(),
+        isRejected: false
+      };
+      partner.ring = None;
+      weddings.insert(weddingId, wedding)
+      partners.insert(partner.id, partner)
+      return Some(weddingId)
+    } else {
+      console.log(`wedding already exists`)
+      return Some(wedding.id)
+    }
+  }
+}
+
+const SetRingInput = Record({
+  ringBase64: text,
+})
+
+let setRingHandler = async (input) => {
+  console.log('called mintNftHandler for nftCanisterId: ' + nftCanisterId)
+  let principal = ic.caller()
+  let u8arr = Uint8Array.from(Buffer.from(input.ringBase64))
+  let rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
+  console.log('str: ' + rawArg)
+  try {
+    let maybePartner = partners.get(principal)
+    if ('None' in maybePartner) {
+      console.log(`partner not found`)
+      return;
+    }
+    let partner = maybePartner.Some!
+    if ('Some' in partner.ring) {
+      console.log('ring already exists, token_id: ' + partner.ring.Some!.token_id)
+      return;
+    }
+    let result = await ic.call(nftCanister.mintDip721_text, {
+      args: [principal, rawArg, []]
+    });
+    console.log('result: ' + JSON.stringify(result))
+    let obj = JSON.parse((result as String).toString());
+    if (obj.hasOwnProperty("Err")) {
+      console.log("error!")
+      return
+    }
+    let tokenId = obj["Ok"]["token_id"];
+    const ring: typeof Ring = {
+      token_id: BigInt(tokenId),
+      data: input.ringBase64
+    }
+    partner.ring = Some(ring)
+    partners.insert(partner.id, partner)
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export default Canister({
-  matchPartner: update([text, Principal], Void, matchPartnerHandler),
-  agreeToMarry: update([], Void, agreeToMarryHandler),
+  createWedding: update([CreateWeddingInput], Opt(text), createWeddingHandler),
+  acceptProposal: update([AcceptProposalInput], Void, acceptProposalHandler),
+  rejectProposal: update([RejectProposalInput], Void, rejectProposalHandler),
+
   getPartnerInfo: query([Principal], Opt(Partner), getPartnerInfoHandler),
-  getWeddingInfoOf: query([Principal], Opt(WeddingInfo), getWeddingInfoOfHandler),
-  getAppVersion: query([], text, getAppVersionHandler),
+  getWeddingInfoOf: query([Principal], Opt(WeddingInfo), getWeddingInfoHandler),
+
   mintNft: update([text, Principal], Void, mintNftHandler),
-  createProposal: update([ProposalInput], Opt(text), createProposalHandler),
-  getProposalById: query([text], Opt(ProposalInfo), getProposalByIdHandler),
-  rejectProposal: update([text], Void, rejectProposalHandler),
-  acceptProposal: update([text], Void, acceptProposalHandler),
+  setRing: update([SetRingInput], Void, setRingHandler),
+  getAppVersion: query([], text, getAppVersionHandler),
 });
 
 

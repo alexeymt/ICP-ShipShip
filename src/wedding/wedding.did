@@ -1,12 +1,10 @@
 service: () -> {
-    acceptProposal: (text) -> ();
-    agreeToMarry: () -> ();
-    createProposal: (record {proposeeName:text; proposerName:text}) -> (opt text);
+    acceptProposal: (record {proposeeName:text; weddingId:text}) -> ();
+    createWedding: (record {proposerName:text}) -> (opt text);
     getAppVersion: () -> (text) query;
-    getPartnerInfo: (principal) -> (opt record {id:principal; name:opt text; wedding:opt text; proposal:opt text; isAgreed:bool}) query;
-    getProposalById: (text) -> (opt record {id:text; proposeeName:text; isAccepted:opt bool; proposerPartner:record {id:principal; name:opt text; wedding:opt text; proposal:opt text; isAgreed:bool}; proposerId:principal}) query;
-    getWeddingInfoOf: (principal) -> (opt record {id:text; hadAt:nat; partner1:record {id:principal; name:opt text; wedding:opt text; proposal:opt text; isAgreed:bool}; partner2:record {id:principal; name:opt text; wedding:opt text; proposal:opt text; isAgreed:bool}; ring1:record {token_id:nat64; data:text}; ring2:record {token_id:nat64; data:text}}) query;
-    matchPartner: (text, principal) -> ();
+    getPartnerInfo: (principal) -> (opt record {id:principal; name:text; ring:opt record {token_id:nat64; data:text}; wedding:text; isAgreed:opt bool}) query;
+    getWeddingInfoOf: (principal) -> (opt record {id:text; hadAt:nat; isRejected:bool; partner1:record {id:principal; name:text; ring:opt record {token_id:nat64; data:text}; wedding:text; isAgreed:opt bool}; partner2:opt record {id:principal; name:text; ring:opt record {token_id:nat64; data:text}; wedding:text; isAgreed:opt bool}}) query;
     mintNft: (text, principal) -> ();
-    rejectProposal: (text) -> ();
+    rejectProposal: (record {weddingId:text}) -> ();
+    setRing: (record {ringBase64:text}) -> ();
 }
