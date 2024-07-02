@@ -16,7 +16,7 @@ import {
   Void,
 } from 'azle';
 import { v4 as uuidv4 } from 'uuid';
-import { zodiacTable, zodiacSigns } from './zodiacCompatibility';
+import { zodiacTable, zodiacSigns, compatibilityTable } from './zodiacCompatibility';
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {
@@ -250,7 +250,19 @@ let checkCompatibilityHandler = (dateOfBirth1: text, dateOfBirth2: text) => {
     return None;
   }
 
-  return Some(zodiacTable[zodiacSign1][zodiacSign2]);
+  const zodiac_compatibility = zodiacTable[zodiacSign1][zodiacSign2];
+
+  const lifePathNumber1 = calcLifePathNumber(dateOfBirth1);
+  const lifePathNumber2 = calcLifePathNumber(dateOfBirth2);
+  const lifePathNumberCompatibility = compatibilityTable[`${lifePathNumber1},${lifePathNumber2}`]
+    || compatibilityTable[`${lifePathNumber2},${lifePathNumber1}`]
+    || 'Neutral Compatibility';
+
+  return Some({
+    compatibility: lifePathNumberCompatibility,
+    strengths: zodiac_compatibility.strengths,
+    weaknesses: zodiac_compatibility.weaknesses,
+  });
 };
 
 export default Canister({
