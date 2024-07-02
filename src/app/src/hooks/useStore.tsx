@@ -66,6 +66,8 @@ const useStore_ = (options = defaultOptions) => {
     const principal_ = identity_.getPrincipal();
     setPrincipal(principal_);
 
+    console.log("weddingCanisterId: " + weddingCanisterId)
+
     const weddingActor_ = createWeddingActor(weddingCanisterId, {
       agentOptions: {
         identity: identity_,

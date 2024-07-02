@@ -144,6 +144,7 @@ service : (InitArgs) -> {
     getApprovedDip721 : (token_id : nat64) -> (TxReceipt) query;
     isApprovedForAllDip721 : (operator : principal) -> (bool) query;
     mintDip721 : (to : principal, metadata : MetadataDesc, blobContent : blob) -> (MintReceipt);
+    mintDip721_text : (to : principal, metadata : text, blobContent : blob) -> (text);
     burnDip721 : (token_id : nat64) -> (TxReceipt);
 
     set_name : (name : text) -> (ManageResult);
