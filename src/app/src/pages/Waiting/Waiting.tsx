@@ -9,6 +9,11 @@ import { CeremonyContainer, GradientTypography } from '../../styles';
 import { sleep } from '../../utils';
 import { PrivateRoute } from '../../auth';
 import { isYieldExpression } from 'typescript';
+import styled from '@emotion/styled';
+
+const ButtonWrapper = styled.div({
+  marginTop: '50px',
+});
 
 export const Waiting = () => {
   const navigate = useNavigate();
@@ -61,19 +66,15 @@ export const Waiting = () => {
             isAccepted: !!myPartnerInfo?.isAgreed,
           }}
         />
-
-        <Typography align="center" variant="body" css={{ fontSize: 18, margin: '39px 0' }}>
-          With this, I commit to cherish and respect our -ship from this moment forward. Will you join me in this
-          journey?
-        </Typography>
-
-        <Button
-          disabled={myPartnerInfo?.isAgreed || isAgreeToMerryDisabled}
-          onClick={handleAgreeToMarry}
-          text="I do"
-          variant="secondary"
-          sx={{ display: 'flex', margin: '0 auto' }}
-        />
+        <ButtonWrapper>
+          <Button
+            disabled={myPartnerInfo?.isAgreed || isAgreeToMerryDisabled}
+            onClick={handleAgreeToMarry}
+            text="Start ceremony"
+            variant="secondary"
+            sx={{ display: 'flex', margin: '0 auto' }}
+          />
+        </ButtonWrapper>
       </CeremonyContainer>
     </PrivateRoute>
   );

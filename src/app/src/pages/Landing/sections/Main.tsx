@@ -48,8 +48,8 @@ export const Main = () => {
           The very first service that helps the <br /> Universe connect souls 💫
         </Typography>
         <div css={{ ...flexHelper({ alignItems: 'center' }), gap: 16, marginTop: 36 }}>
-          <Button size="lg" variant="primary" text="MATCH 💓" />
-          <Button onClick={handleConnect} size="lg" variant="secondary" text="Connect" />
+          <Button size="lg" variant="primary" text="VIBE CHECK 💓" />
+          <Button onClick={handleConnect} size="lg" variant="secondary" text="Pair & Share" />
         </div>
       </ContentContainer>
       <InfinityImg />

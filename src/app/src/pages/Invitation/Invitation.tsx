@@ -28,9 +28,22 @@ const StyledTypography = styled(Typography)({
   marginTop: '30px',
 });
 
+const StyledName = styled(Typography)({
+  fontSize: '35px',
+});
+
+const StyledMyName = styled(Typography)({
+  marginTop: '20px',
+  fontSize: '25px',
+});
+
+const StyledInvitation = styled(Typography)({
+  marginTop: '10px',
+  fontSize: '30px',
+});
+
 const ButtonsWrapper = styled.div({
   display: 'flex',
-  marginTop: '50px',
 });
 
 const SpinnerWrapper = styled.div({
@@ -44,6 +57,7 @@ export const Invitation = () => {
   const [searchParams] = useSearchParams();
   const [showSpinner, setShowSpinner] = useState(false);
   const partnerName = searchParams.get('partnerName');
+  const myName = searchParams.get('myName');
 
   const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo } = useStore();
 
@@ -72,10 +86,6 @@ export const Invitation = () => {
 
     return () => clearTimeout(timerId);
   }, [isAuthenticated]);
-
-  // const redirectToDisagreePage = () => {
-  //   navigate(`/reject?partnerName=${partnerName}`);
-  // };
 
   const handleConnect = useCallback(async () => {
     if (isAuthenticated) {
@@ -119,13 +129,18 @@ export const Invitation = () => {
         )}
         {partnerName && (
           <>
-            <Typography align="center" variant="h3" color="black">
-              {`Hey ${partnerName}! Ready to take our digital romance`} <br /> to the next level? 🌟
-            </Typography>
+            <StyledName align="center" variant="h1" color="black">{`Hey ${partnerName}!`}</StyledName>
+            <StyledInvitation align="center" variant="h2" color="black">
+              Ready to take our digital romance
+              <br /> to the next level? 🌟
+            </StyledInvitation>
             <StyledTypography align="center" variant="h3" color="black">
               Dive into this virtual love story with me, where every click brings us closer. Let’s make our connection
               official and build something beautiful together. 💖🚀
             </StyledTypography>
+            <StyledMyName align="center" variant="h1" color="black">
+              {myName}
+            </StyledMyName>
             <ButtonsWrapper>
               <Button type="button" variant="secondary" text="Accept" sx={buttonStyles} onClick={handleConnect} />
               <Button type="button" variant="primary" text="Reject" sx={buttonStyles} onClick={handleReject} />
