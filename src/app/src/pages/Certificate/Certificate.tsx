@@ -57,7 +57,6 @@ const CompaniesContainer = styled.div({
 export const Certificate = () => {
   const { weddingInfo, myPartnerInfo, otherPartnerInfo } = useStore();
 
-  const marriageId = weddingInfo?.id.slice(0, 8);
   const marriageDate = weddingInfo ? moment.unix(Math.floor(Number(weddingInfo.hadAt) / 10e8)) : moment(0);
 
   return (
@@ -72,12 +71,6 @@ export const Certificate = () => {
         >
           digital connection certificate
         </Typography>
-        <Typography
-          color="white"
-          variant="body"
-          family={FontFamily.PPMori}
-          align="center"
-        >{`id #${marriageId}`}</Typography>
 
         <Participants>
           <ICP src={icp} alt="icp" />

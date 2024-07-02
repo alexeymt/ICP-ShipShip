@@ -84,20 +84,12 @@ export const Form = () => {
           placeholder="Ashley Green"
           sx={{ marginTop: 20 }}
         />
-        <Input
-          title="Paste your partner’s ID"
-          onChange={handlePartnerPrincipleTextChange}
-          placeholder="so5z4-2ggdf-ocjtb-s3ech-pukgc-jsiar-6zy35-zlbqk-vhsal-osjl7-fae"
-          sx={{ marginTop: 20 }}
-        />
-
         <ShareLink
           title="Invite your partner to connect"
-          description="Share link:"
-          link={`/invitation?partnerName=${myPartnerName}`}
+          description="Copy link and share it with your sweetheart"
+          link={`/invitation?partnerName=${myPartnerName}&myName=${myName}`}
           disabled={myPartnerName.length === 0 || partnerPrincipleText.length === 0}
         />
-
         <Button
           type="submit"
           variant="secondary"
