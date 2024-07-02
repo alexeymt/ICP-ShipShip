@@ -27,7 +27,8 @@ const weddingRecord = {
   partner1: Principal,
   partner2: Opt(Principal),
   hadAt: nat,
-  isRejected: bool
+  isRejected: bool,
+  isPaid: bool,
 };
 
 const Wedding = Record(weddingRecord);
@@ -42,7 +43,8 @@ const Partner = Record({
   name: text,
   wedding: text,
   isAgreed: Opt(bool),
-  ring: Opt(Ring)
+  ring: Opt(Ring),
+  isWaiting: bool,
 });
 
 const WeddingInfo = Record({
@@ -54,8 +56,6 @@ const WeddingInfo = Record({
 let weddings = StableBTreeMap(text, Wedding, 1)!;
 
 let partners = StableBTreeMap(Principal, Partner, 2)!;
-
-let rings = StableBTreeMap(Principal, Ring, 3)!;
 
 let getWeddingInfoHandler = (principal) => {
   console.log(`getting wedding info`)
@@ -97,7 +97,9 @@ let getAppVersionHandler = () => {
 const canister_ids = require("../../.dfx/local/canister_ids.json");
 
 export const nftCanisterId = canister_ids["dip721_nft_container"].local as string;
+export const weddingCanisterId = canister_ids["wedding"].local as string;
 
+const weddingPrincipal = Principal.fromText(weddingCanisterId)
 
 const NftCanister = Canister({
   is_custodian: query([Principal], bool),
@@ -109,36 +111,6 @@ const NftCanister = Canister({
 const nftCanister = NftCanister(
   Principal.fromText(nftCanisterId)
 );
-
-let mintNftHandler = async (text: string, principal: Principal) => {
-  console.log('called mintNftHandler for nftCanisterId: ' + nftCanisterId)
-  let u8arr = Uint8Array.from(Buffer.from(text))
-  let str = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
-  console.log('str: ' + str)
-  try {
-    let maybeRing = rings.get(principal)
-    if ('None' ! in maybeRing) {
-      console.log('ring already exists, token_id: ' + maybeRing.Some!.token_id)
-    }
-    let result = await ic.call(nftCanister.mintDip721_text, {
-      args: [principal, str, []]
-    });
-    console.log('result: ' + JSON.stringify(result))
-    let obj = JSON.parse((result as String).toString());
-    if (obj.hasOwnProperty("Err")) {
-      console.log("error!")
-      return
-    }
-    let tokenId = obj["Ok"]["token_id"];
-    const ring: typeof Ring = {
-      token_id: BigInt(tokenId),
-      data: text
-    }
-    rings.insert(principal, ring)
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 const RejectProposalInput = Record({
   weddingId: text
@@ -186,7 +158,8 @@ let acceptProposalHandler = (input) => {
     name: input.proposeeName,
     wedding: weddingId,
     isAgreed: None,
-    ring: None
+    ring: None,
+    isWaiting: false,
   };
   wedding.partner2 = Some(principal)
   weddings.insert(weddingId, wedding)
@@ -211,7 +184,8 @@ let createWeddingHandler = (input) => {
       name: input.proposerName,
       wedding: weddingId,
       isAgreed: None,
-      ring: None
+      ring: None,
+      isWaiting: false
     };
     partners.insert(partner.id, partner);
     console.log("wedding would be created: " + weddingId.toString())
@@ -220,7 +194,8 @@ let createWeddingHandler = (input) => {
       partner1: principal,
       partner2: None,
       hadAt: ic.time(),
-      isRejected: false
+      isRejected: false,
+      isPaid: false
     };
     weddings.insert(weddingId, wedding)
     return Some(weddingId)
@@ -236,7 +211,8 @@ let createWeddingHandler = (input) => {
         partner1: principal,
         partner2: None,
         hadAt: ic.time(),
-        isRejected: false
+        isRejected: false,
+        isPaid: false
       };
       partner.ring = None;
       weddings.insert(weddingId, wedding)
@@ -255,12 +231,12 @@ const SetRingInput = Record({
 
 let setRingHandler = async (input) => {
   console.log('called mintNftHandler for nftCanisterId: ' + nftCanisterId)
-  let principal = ic.caller()
+  let caller = ic.caller()
   let u8arr = Uint8Array.from(Buffer.from(input.ringBase64))
   let rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
   console.log('str: ' + rawArg)
   try {
-    let maybePartner = partners.get(principal)
+    let maybePartner = partners.get(caller)
     if ('None' in maybePartner) {
       console.log(`partner not found`)
       return;
@@ -271,7 +247,7 @@ let setRingHandler = async (input) => {
       return;
     }
     let result = await ic.call(nftCanister.mintDip721_text, {
-      args: [principal, rawArg, []]
+      args: [weddingPrincipal, rawArg, []]
     });
     console.log('result: ' + JSON.stringify(result))
     let obj = JSON.parse((result as String).toString());
@@ -291,6 +267,41 @@ let setRingHandler = async (input) => {
   }
 }
 
+let setPartnerWaitingHandler = () => {
+  const partnersOpt = partners.get(ic.caller());
+  if ('None' in partnersOpt) {
+    ic.trap('Please call a match method first');
+    return;
+  }
+  const partner = partnersOpt.Some;
+  /*if ('None' in partner.name) {
+    ic.trap('Please call a match method first to accept');
+    return;
+  }*/
+
+  partner.isWaiting = true;
+  partners.insert(partner.id, partner);
+};
+
+let payHandler = () => {
+  let principal = ic.caller();
+  console.log(`principal: ${principal.toString()}`)
+  let maybePartner = partners.get(principal);
+  if ('None' in maybePartner) {
+    console.log(`partner not found ${principal.toString()}`)
+    return;
+  }
+  let maybeWedding = weddings.get(maybePartner.Some!.wedding)
+  if ('None' in maybeWedding) {
+    console.log(`wedding not found ${principal.toString()}`)
+    return;
+  }
+  let wedding = maybeWedding.Some!
+  wedding.isPaid = true
+  weddings.insert(wedding.id, wedding)
+  console.log(`wedding ${wedding.id.toString()} is paid`)
+}
+
 export default Canister({
   createWedding: update([CreateWeddingInput], Opt(text), createWeddingHandler),
   acceptProposal: update([AcceptProposalInput], Void, acceptProposalHandler),
@@ -299,9 +310,11 @@ export default Canister({
   getPartnerInfo: query([Principal], Opt(Partner), getPartnerInfoHandler),
   getWeddingInfoOf: query([Principal], Opt(WeddingInfo), getWeddingInfoHandler),
 
-  mintNft: update([text, Principal], Void, mintNftHandler),
   setRing: update([SetRingInput], Void, setRingHandler),
   getAppVersion: query([], text, getAppVersionHandler),
+
+  setPartnerWaiting: update([], Void, setPartnerWaitingHandler),
+  pay: update([], Void, payHandler)
 });
 
 
