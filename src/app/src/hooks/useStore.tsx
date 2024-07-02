@@ -71,7 +71,6 @@ const useStore_ = (options = defaultOptions) => {
         identity: identity_,
       },
     });
-
     setWeddingActor(weddingActor_);
 
     window.clearInterval(getWeddingInfoInterval.current);

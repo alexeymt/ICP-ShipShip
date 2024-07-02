@@ -1,7 +1,7 @@
 import {
   blob,
   bool,
-  Canister, Err,
+  Canister,
   ic,
   nat, nat64,
   None,
@@ -16,6 +16,7 @@ import {
   Void,
 } from 'azle';
 import { v4 as uuidv4 } from 'uuid';
+import { zodiacTable, zodiacSigns } from './zodiacCompatibility';
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {
@@ -49,6 +50,12 @@ const WeddingInfo = Record({
   ring1: Ring,
   partner2: Partner,
   ring2: Ring
+});
+
+const CompatibilityResult = Record({
+  compatibility: text,
+  strengths: Vec(text),
+  weaknesses: Vec(text),
 });
 
 let weddings = StableBTreeMap(text, Wedding, 1)!;
@@ -202,6 +209,50 @@ let mintNftHandler = async (text: string, principal: Principal) => {
   }
 };
 
+let checkCompatibilityHandler = (dateOfBirth1: text, dateOfBirth2: text) => {
+  const calcLifePathNumber = (value: string) => {
+    let sum = 0;
+
+    value.split('').forEach((x) => {
+      sum += parseInt(x);
+    });
+
+    if (sum > 9) {
+      return calcLifePathNumber(sum.toString());
+    }
+
+      return sum;
+  };
+
+  const determineZodiacSign = (dateOfBirth: string) => {
+    const month = parseInt(dateOfBirth.slice(4, 6));
+    const day = parseInt(dateOfBirth.slice(6, 8));
+
+    for (let i = 0; i < zodiacSigns.length; i++) {
+        let sign = zodiacSigns[i];
+        let start = sign.start;
+        let end = sign.end;
+
+        if ((month === start.month && day >= start.day) ||
+            (month === end.month && day <= end.day) ||
+            (month > start.month && month < end.month)) {
+            return sign.sign;
+        }
+    }
+
+    return null;
+  };
+
+  const zodiacSign1 = determineZodiacSign(dateOfBirth1);
+  const zodiacSign2 = determineZodiacSign(dateOfBirth2);
+
+  if (zodiacSign1 === null || zodiacSign2 === null) {
+    return None;
+  }
+
+  return Some(zodiacTable[zodiacSign1][zodiacSign2]);
+};
+
 export default Canister({
   matchPartner: update([text, Principal], Void, matchPartnerHandler),
   agreeToMarry: update([], Void, agreeToMarryHandler),
@@ -210,6 +261,7 @@ export default Canister({
   getAppVersion: query([], text, getAppVersionHandler),
   setRing: query([text, Principal], Void, setRingHandler),
   mintNft: update([text, Principal], Void, mintNftHandler),
+  checkCompatibility: query([text, text], Opt(CompatibilityResult), checkCompatibilityHandler),
 });
 
 
