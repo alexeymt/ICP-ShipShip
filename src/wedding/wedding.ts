@@ -234,7 +234,8 @@ let createWeddingHandler = (input) => {
 
 let setCertificateHandler = async (weddingId: text) => {
   const caller = ic.caller()
-  const rawArg = eval('`[{"id":${weddingId}}]`')
+  const u8arr = Uint8Array.from(Buffer.from(weddingId))
+  const rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
 
   try {
     const maybeWedding = weddings.get(weddingId);
@@ -243,46 +244,37 @@ let setCertificateHandler = async (weddingId: text) => {
       return;
     }
 
+    let certificate: typeof Certificate;
+
     const maybeCertificate = certificates.get(weddingId);
     if ('None' in maybeCertificate) {
-      console.log('Certificate not found');
-      return;
+      const maybePartner = partners.get(caller)
+      if ('None' in maybePartner) {
+        console.log(`partner not found`)
+        return;
+      }
+
+      const result = await ic.call(nftCanister.mintDip721_text, {
+        args: [weddingPrincipal, rawArg, []]
+      });
+      console.log('result: ' + JSON.stringify(result))
+
+      const obj = JSON.parse((result as String).toString());
+      if (obj.hasOwnProperty("Err")) {
+        console.log("error!")
+        return
+      }
+      certificate = {
+        token_id: BigInt(obj["Ok"]["token_id"]),
+        weddingId: weddingId
+      }
+      certificates.insert(weddingId, certificate)
+    }
+    else {
+      certificate = maybeCertificate.Some!;
     }
 
-    let certificate = maybeCertificate.Some!;
-    if (certificate) {
-      console.log('Certificate already exists');
-      return;
-    }
-
-    let maybePartner = partners.get(caller)
-    if ('None' in maybePartner) {
-      console.log(`partner not found`)
-      return;
-    }
-
-    let partner = maybePartner.Some!
-    if ('Some' in partner.ring) {
-      console.log('ring already exists, token_id: ' + partner.ring.Some!.token_id)
-      return;
-    }
-
-    let result = await ic.call(nftCanister.mintDip721_text, {
-      args: [weddingPrincipal, rawArg, []]
-    });
-    console.log('result: ' + JSON.stringify(result))
-
-    let obj = JSON.parse((result as String).toString());
-    if (obj.hasOwnProperty("Err")) {
-      console.log("error!")
-      return
-    }
-    let tokenId = obj["Ok"]["token_id"];
-    certificate = {
-      token_id: BigInt(tokenId),
-      weddingId: weddingId
-    }
-    certificates.insert(weddingId, certificate)
+    console.log('certificate ' + certificate)
   } catch (error) {
     console.log(error);
   }
