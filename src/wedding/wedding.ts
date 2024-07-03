@@ -2,6 +2,7 @@ import {
   blob,
   bool,
   Canister,
+
   ic,
   nat,
   nat64,
@@ -14,7 +15,8 @@ import {
   Some,
   StableBTreeMap,
   text,
-  update, Vec,
+  update,
+  Vec,
   Void,
 } from 'azle';
 import { v4 as uuidv4 } from 'uuid';
@@ -93,7 +95,7 @@ let getWeddingInfoHandler = (principal) => {
     } else {
       partner2 = None;
     }
-  } else {
+    } else {
     partner1 = partners.get(wedding.partner1).Some!;
     partner2 = Some(partner);
   }
