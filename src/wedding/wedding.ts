@@ -34,7 +34,7 @@ const weddingRecord = {
 const Wedding = Record(weddingRecord);
 
 const Ring = Record({
-  token_id: nat64,
+  tokenId: Opt(nat64),
   data: text
 })
 
@@ -285,7 +285,25 @@ const SetRingInput = Record({
 })
 
 let setRingHandler = async (input) => {
-  console.log('called mintNftHandler for nftCanisterId: ' + nftCanisterId)
+  let caller = ic.caller()
+  let maybePartner = partners.get(caller)
+  if ('None' in maybePartner) {
+    console.log(`partner not found`)
+    return;
+  }
+  let partner = maybePartner.Some!
+  if ('Some' in partner.ring) {
+    console.log('ring already exists, token_id: ' + partner.ring.Some!.tokenId)
+    return;
+  }
+  const ring: typeof Ring = {
+    token_id: None,
+    data: input.ringBase64
+  }
+  partner.ring = Some(ring)
+  partners.insert(partner.id, partner)
+
+  /*console.log('called mintNftHandler for nftCanisterId: ' + nftCanisterId)
   let caller = ic.caller()
   let u8arr = Uint8Array.from(Buffer.from(input.ringBase64))
   let rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
@@ -301,16 +319,7 @@ let setRingHandler = async (input) => {
       console.log('ring already exists, token_id: ' + partner.ring.Some!.token_id)
       return;
     }
-    let result = await ic.call(nftCanister.mintDip721_text, {
-      args: [weddingPrincipal, rawArg, []]
-    });
-    console.log('result: ' + JSON.stringify(result))
-    let obj = JSON.parse((result as String).toString());
-    if (obj.hasOwnProperty("Err")) {
-      console.log("error!")
-      return
-    }
-    let tokenId = obj["Ok"]["token_id"];
+
     const ring: typeof Ring = {
       token_id: BigInt(tokenId),
       data: input.ringBase64
@@ -319,7 +328,7 @@ let setRingHandler = async (input) => {
     partners.insert(partner.id, partner)
   } catch (error) {
     console.log(error);
-  }
+  }*/
 }
 
 let setPartnerWaitingHandler = () => {
@@ -338,7 +347,7 @@ let setPartnerWaitingHandler = () => {
   partners.insert(partner.id, partner);
 };
 
-let payHandler = () => {
+let payHandler = async () => {
   let principal = ic.caller();
   console.log(`principal: ${principal.toString()}`)
   let maybePartner = partners.get(principal);
@@ -352,9 +361,51 @@ let payHandler = () => {
     return;
   }
   let wedding = maybeWedding.Some!
+
+  let partner = partners.get(wedding.partner1).Some!
+  await mintPartnersRingAndUpdate(partner)
+  partner = partners.get(wedding.partner2.Some!).Some!
+  await mintPartnersRingAndUpdate(partner)
+
   wedding.isPaid = true
   weddings.insert(wedding.id, wedding)
   console.log(`wedding ${wedding.id.toString()} is paid`)
+}
+
+let mintPartnersRingAndUpdate = async (partner: typeof Partner) => {
+  if ('None' in partner.ring) {
+    throw (`ring is not defined for partner: ${partner.id}`)
+  }
+  let ring = partner.ring.Some!
+  let u8arr = Uint8Array.from(Buffer.from(partner.ring.Some!.data))
+  let rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
+  console.log('str: ' + rawArg)
+  let result = await ic.call(nftCanister.mintDip721_text, {
+    args: [weddingPrincipal, rawArg, []]
+  });
+  console.log('result: ' + JSON.stringify(result))
+  let obj = JSON.parse((result as String).toString());
+  if (obj.hasOwnProperty("Err")) {
+    console.log("error!")
+    return
+  }
+  let tokenId = obj["Ok"]["token_id"];
+  console.log(`minted ring token: ${tokenId}`)
+  ring.tokenId = tokenId
+  partner.ring = Some(ring)
+  partners.insert(partner.id, partner)
+}
+
+let agreeToMarryHandler = () => {
+  let principal = ic.caller();
+  console.log(`principal: ${principal.toString()}`)
+  let maybePartner = partners.get(principal);
+  if ('None' in maybePartner) {
+    console.log(`partner not found ${principal.toString()}`)
+    return;
+  }
+  let partner = maybePartner.Some!
+  partner.isAgreed = Some(true)
 }
 
 export default Canister({
@@ -372,8 +423,8 @@ export default Canister({
   pay: update([], Void, payHandler),
 
   setCertificate: update([text], Void, setCertificateHandler),
+  agreeToMarry: update([], Void, agreeToMarryHandler),
 });
-
 
 globalThis.crypto = {
   // @ts-expect-error Uint8Array is compatible with ArrayBufferView
