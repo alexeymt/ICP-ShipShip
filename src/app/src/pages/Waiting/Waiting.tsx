@@ -2,13 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
-import { Button, Typography, WeddingStepper } from '../../components';
+import { Button, WeddingStepper } from '../../components';
 import { routes } from '../../containers';
 import { useStore } from '../../hooks';
 import { CeremonyContainer, GradientTypography } from '../../styles';
-import { sleep } from '../../utils';
 import { PrivateRoute } from '../../auth';
-import { isYieldExpression } from 'typescript';
 import styled from '@emotion/styled';
 
 const ButtonWrapper = styled.div({
@@ -17,32 +15,34 @@ const ButtonWrapper = styled.div({
 
 export const Waiting = () => {
   const navigate = useNavigate();
-  const { myPartnerInfo, otherPartnerInfo, weddingActor } = useStore();
-  const [isAgreeToMerryDisabled, setIsAgreeToMerryDisabled] = useState(false);
+  const { myPartnerInfo, otherPartnerInfo, weddingActor, weddingInfo, handleGetWeddingInfo } = useStore();
+  const [isStartCeremonyDisabled, setIsStartCeremonyDisabled] = useState(false);
 
-  const handleAgreeToMarry = useCallback(async () => {
+  console.log(JSON.stringify(myPartnerInfo));
+  console.log(JSON.stringify(otherPartnerInfo));
+
+  const handleStartCeremony = useCallback(async () => {
     try {
-      setIsAgreeToMerryDisabled(true);
-      await weddingActor.agreeToMarry();
-      toast.success('You agreed to marry');
+      setIsStartCeremonyDisabled(true);
+      await weddingActor.setPartnerWaiting();
+      toast.success('You ready for ceremony');
     } catch (error) {
       console.error(error);
-      toast.error('Error while agreeing to marry!');
+      toast.error('Error while starting ceremony!');
     }
+    await handleGetWeddingInfo();
   }, [weddingActor]);
 
-  const handleNavigateCertificate = useCallback(async () => {
-    await sleep(2000);
-    toast.success('You have been married');
-    navigate(routes.certificate.root);
+  const handleNavigateChoseRing = useCallback(async () => {
+    toast.success('Ceremony started');
+    navigate(routes.choose.root);
   }, [navigate]);
-  isYieldExpression;
 
   useEffect(() => {
-    if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {
-      handleNavigateCertificate();
+    if (myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+      handleNavigateChoseRing();
     }
-  }, [handleNavigateCertificate, myPartnerInfo?.isAgreed, otherPartnerInfo?.isAgreed]);
+  }, [handleNavigateChoseRing, myPartnerInfo?.isWaiting, otherPartnerInfo?.isWaiting]);
 
   useEffect(() => {
     if (otherPartnerInfo?.isRejected) {
@@ -59,17 +59,17 @@ export const Waiting = () => {
         <WeddingStepper
           partner1={{
             name: (otherPartnerInfo?.name?.[0] ?? '?')[0],
-            isAccepted: !!otherPartnerInfo?.isAgreed,
+            isAccepted: !!otherPartnerInfo?.isWaiting,
           }}
           partner2={{
             name: (myPartnerInfo?.name?.[0] ?? '?')[0],
-            isAccepted: !!myPartnerInfo?.isAgreed,
+            isAccepted: !!myPartnerInfo?.isWaiting,
           }}
         />
         <ButtonWrapper>
           <Button
-            disabled={myPartnerInfo?.isAgreed || isAgreeToMerryDisabled}
-            onClick={handleAgreeToMarry}
+            disabled={myPartnerInfo?.isWaiting || isStartCeremonyDisabled}
+            onClick={handleStartCeremony}
             text="Start ceremony"
             variant="secondary"
             sx={{ display: 'flex', margin: '0 auto' }}

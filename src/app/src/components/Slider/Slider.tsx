@@ -1,4 +1,3 @@
-import { MouseEvent, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Navigation } from 'swiper/modules';
 import { ringsList } from './images';
@@ -16,7 +15,6 @@ interface SliderProps {
 
 export const Slider = ({ onSelect, currentCollection }: SliderProps) => {
   const handleRingSelect = (index: number) => () => {
-    console.log(index);
     onSelect(index);
   };
 
