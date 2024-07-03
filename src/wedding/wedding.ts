@@ -2,10 +2,9 @@ import {
   blob,
   bool,
   Canister,
-
   ic,
   nat,
-  nat64,
+  nat64, nat8,
   None,
   Opt,
   Principal,
@@ -101,7 +100,7 @@ let getWeddingInfoHandler = (principal) => {
   }
 
   return Some(
-    { ...wedding, partner1, partner2 }, // as any
+    {...wedding, partner1, partner2}, // as any
   );
 };
 
@@ -118,8 +117,27 @@ const canister_ids = require('../../.dfx/local/canister_ids.json');
 
 export const nftCanisterId = canister_ids['dip721_nft_container'].local as string;
 export const weddingCanisterId = canister_ids['wedding'].local as string;
+export const ledgerCanisterId = canister_ids['icp_ledger_canister'].local as string;
 
 const weddingPrincipal = Principal.fromText(weddingCanisterId);
+
+const Account = Record({
+  owner: Principal/*,
+  subaccount: Opt(Vec(nat8))*/
+})
+
+const TransferArg = Record({
+  to: Account,
+  amount: nat
+})
+
+const LegderCanister = Canister({
+  icrc1_name: query([], text),
+  icrc1_balance_of: query([Account], nat),
+})
+
+
+const legderCanister = LegderCanister(Principal.fromText(ledgerCanisterId))
 
 const NftCanister = Canister({
   is_custodian: query([Principal], bool),
@@ -290,6 +308,7 @@ let setCertificateHandler = async (weddingId: text) => {
   }
 };
 
+
 const SetRingInput = Record({
   ringBase64: text,
 });
@@ -336,6 +355,69 @@ let updatePartnerNameHandler = (partnerName: text) => {
   partners.insert(partner.id, partner);
 };
 
+let checkBalance = async (p: Principal) => {
+  let args = {
+    owner: p,
+  }
+  try {
+    const result = await ic.call(legderCanister.icrc1_balance_of, {
+      args: [args]
+    });
+    console.log(`balance of ${p.toString()} is ${JSON.stringify(result)}`)
+  } catch (e) {
+    console.log(`error ${e}`)
+  }
+}
+
+const beneficiary = "5yg43-67op4-r2q2a-uqxp6-5aaw5-tnriu-jwnv7-t2jyu-4mrdy-4ryan-lqe"
+
+async function transfer() {
+  try {
+    let arg = ic.candidEncode(`(
+  record {
+    to = record {
+      owner = principal "${beneficiary}";
+      subaccount = null;
+    };
+    fee = null;
+    spender_subaccount = null;
+    from = record {
+      owner = principal "${ic.caller().toString()}";
+      subaccount = null;
+    };
+    memo = null;
+    created_at_time = null;
+    amount = 20_000 : nat;
+  },
+)`)
+    let res = await ic.callRaw(Principal.fromText(ledgerCanisterId), 'icrc2_transfer_from', arg, BigInt(0));
+    let result = await ic.candidDecode(res)
+    let regexp = /\(variant { [\d_]* = [\d]* : nat }\)/
+    if (regexp.test(result)) {
+      console.log("OK!@")
+    }
+    console.log('result: ' + result.toString())
+  } catch (e) {
+    console.log(`can't transfer: ${e}`)
+  }
+}
+
+let testPayHandler = async () => {
+  console.log(`test pay handler`)
+  let caller = ic.caller()
+  console.log(`caller: ${caller.toString()}`)
+
+  let b= Principal.fromText(beneficiary)
+
+  await checkBalance(caller)
+  await checkBalance(b)
+
+  await transfer();
+
+  await checkBalance(caller)
+  await checkBalance(b)
+}
+
 let payHandler = async () => {
   let principal = ic.caller();
   console.log(`principal: ${principal.toString()}`);
@@ -355,6 +437,19 @@ let payHandler = async () => {
   await mintPartnersRingAndUpdate(partner);
   partner = partners.get(wedding.partner2.Some!).Some!;
   await mintPartnersRingAndUpdate(partner);
+
+  let caller = ic.caller()
+  console.log(`caller: ${caller.toString()}`)
+
+  let b = Principal.fromText(beneficiary)
+
+  await checkBalance(caller)
+  await checkBalance(b)
+
+  await transfer();
+
+  await checkBalance(caller)
+  await checkBalance(b)
 
   wedding.isPaid = true;
   weddings.insert(wedding.id, wedding);
@@ -471,6 +566,7 @@ export default Canister({
   agreeToMarry: update([], Void, agreeToMarryHandler),
 
   checkCompatibility: query([text, text], Opt(CompatibilityResult), checkCompatibilityHandler),
+  testPay: update([], Void, testPayHandler),
 });
 
 

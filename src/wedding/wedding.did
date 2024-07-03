@@ -11,5 +11,6 @@ service: () -> {
     setCertificate: (text) -> ();
     setPartnerWaiting: () -> ();
     setRing: (record {ringBase64:text}) -> ();
+    testPay: () -> ();
     updatePartnerName: (text) -> ();
 }
