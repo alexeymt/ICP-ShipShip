@@ -6,6 +6,7 @@ import { Button, Spinner, Typography } from '../../components';
 import { routes } from '../../containers';
 import { useStore } from '../../hooks';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const buttonStyles = {
   display: 'flex',
@@ -56,53 +57,71 @@ export const Invitation = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showSpinner, setShowSpinner] = useState(false);
+  const [isAcceptButtonDisabled, setIsAcceptButtonDisabled] = useState(false);
+  const [isAcceptButtonClicked, setIsAcceptButtonClicked] = useState(false);
   const partnerName = searchParams.get('partnerName');
   const myName = searchParams.get('myName');
+  const weddingId = searchParams.get('weddingId');
 
-  const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo } = useStore();
+  const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo, weddingInfo, weddingActor, handleGetWeddingInfo } =
+    useStore();
+  console.log(weddingInfo, weddingId);
 
   useEffect(() => {
-    if (isAuthenticated && myPartnerInfo && otherPartnerInfo) {
-      setShowSpinner(false);
-      // TODO: logic to redirect to select ring or ceremony page
-      if (myPartnerInfo && myPartnerInfo.name.length > 0) {
-        if ((myPartnerInfo?.isAgreed, otherPartnerInfo?.isAgreed)) {
-          navigate(routes.certificate.root);
+    async function implementLogic() {
+      if (isAuthenticated && isAcceptButtonClicked) {
+        if (weddingInfo?.id) {
+          // wedding is created before
+          if (myPartnerInfo && myPartnerInfo?.name.length > 0) {
+            // both partners agreed
+            if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {
+              navigate(routes.certificate.root);
+            }
+
+            // one of partners agreed
+            if (myPartnerInfo?.isAgreed || otherPartnerInfo?.isAgreed) {
+              navigate(routes.ceremony.root);
+            }
+
+            // ring not chosen and both partners started ceremony
+            if (!myPartnerInfo?.ring && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+              navigate(routes.choose.root);
+            }
+
+            //one of partners not started ceremony
+            if (!myPartnerInfo?.isWaiting || !otherPartnerInfo?.isWaiting) {
+              navigate(routes.waiting.root);
+            }
+          } else {
+            navigate(routes.connect.root);
+          }
         } else {
-          navigate(routes.ceremony.root);
+          setIsAcceptButtonDisabled(true);
+          try {
+            await weddingActor.acceptProposal({ proposeeName: myName!, weddingId: weddingId! });
+          } catch (error) {
+            toast.error(`Unable to connect wedding due to error: ${JSON.stringify(error)}`);
+            setIsAcceptButtonDisabled(false);
+            return;
+          }
+          await handleGetWeddingInfo();
+          setIsAcceptButtonDisabled(false);
+          toast.success('Successfully connected to ceremony');
+          navigate(routes.waiting.root);
         }
       }
     }
-  }, [isAuthenticated, myPartnerInfo, otherPartnerInfo]);
+    implementLogic();
+  }, [isAuthenticated, isAcceptButtonClicked, myPartnerInfo, otherPartnerInfo, weddingInfo, navigate]);
 
-  useEffect(() => {
-    let timerId: NodeJS.Timeout;
-    if (isAuthenticated) {
-      timerId = setTimeout(() => {
-        setShowSpinner(false);
-        navigate(routes.connect.root);
-      }, 7000);
-    }
-
-    return () => clearTimeout(timerId);
-  }, [isAuthenticated]);
-
-  const handleConnect = useCallback(async () => {
-    if (isAuthenticated) {
-      if (myPartnerInfo && myPartnerInfo.name.length > 0) {
-        if ((myPartnerInfo?.isAgreed, otherPartnerInfo?.isAgreed)) {
-          navigate(routes.certificate.root);
-        } else {
-          navigate(routes.ceremony.root);
-        }
-      } else {
-        navigate(routes.connect.root);
-      }
-    } else {
-      setShowSpinner(true);
+  const handleAcceptButtonClick = useCallback(async () => {
+    setIsAcceptButtonClicked(true);
+    setIsAcceptButtonDisabled(true);
+    if (!isAuthenticated) {
       await login();
+      await handleGetWeddingInfo();
     }
-  }, [isAuthenticated, login, myPartnerInfo, navigate, otherPartnerInfo?.isAgreed]);
+  }, [isAuthenticated, login]);
 
   const handleReject = useCallback(async () => {
     if (isAuthenticated) {
@@ -122,12 +141,12 @@ export const Invitation = () => {
         </SpinnerWrapper>
       )}
       <ContentWrapper>
-        {!partnerName && (
+        {(!myName || !partnerName || !weddingId) && (
           <Typography align="center" variant="h3" color="black">
             Wrong link
           </Typography>
         )}
-        {partnerName && (
+        {myName && partnerName && weddingId && (
           <>
             <StyledName align="center" variant="h1" color="black">{`Hey ${partnerName}!`}</StyledName>
             <StyledInvitation align="center" variant="h2" color="black">
@@ -142,7 +161,14 @@ export const Invitation = () => {
               {myName}
             </StyledMyName>
             <ButtonsWrapper>
-              <Button type="button" variant="secondary" text="Accept" sx={buttonStyles} onClick={handleConnect} />
+              <Button
+                type="button"
+                variant="secondary"
+                text="Accept"
+                sx={buttonStyles}
+                onClick={handleAcceptButtonClick}
+                disabled={isAcceptButtonDisabled}
+              />
               <Button type="button" variant="primary" text="Reject" sx={buttonStyles} onClick={handleReject} />
             </ButtonsWrapper>
           </>
