@@ -53,9 +53,16 @@ const WeddingInfo = Record({
   partner2: Opt(Partner),
 });
 
+const Certificate = Record({
+  token_id: nat64,
+  weddingId: text,
+});
+
 let weddings = StableBTreeMap(text, Wedding, 1)!;
 
 let partners = StableBTreeMap(Principal, Partner, 2)!;
+
+let certificates = StableBTreeMap(text, Certificate, 3)!;
 
 let getWeddingInfoHandler = (principal) => {
   console.log(`getting wedding info`)
@@ -225,6 +232,54 @@ let createWeddingHandler = (input) => {
   }
 }
 
+let setCertificateHandler = async (weddingId: text) => {
+  const caller = ic.caller()
+  const u8arr = Uint8Array.from(Buffer.from(weddingId))
+  const rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
+
+  try {
+    const maybeWedding = weddings.get(weddingId);
+    if ('None' in maybeWedding) {
+      console.log('Wedding not found');
+      return;
+    }
+
+    let certificate: typeof Certificate;
+
+    const maybeCertificate = certificates.get(weddingId);
+    if ('None' in maybeCertificate) {
+      const maybePartner = partners.get(caller)
+      if ('None' in maybePartner) {
+        console.log(`partner not found`)
+        return;
+      }
+
+      const result = await ic.call(nftCanister.mintDip721_text, {
+        args: [weddingPrincipal, rawArg, []]
+      });
+      console.log('result: ' + JSON.stringify(result))
+
+      const obj = JSON.parse((result as String).toString());
+      if (obj.hasOwnProperty("Err")) {
+        console.log("error!")
+        return
+      }
+      certificate = {
+        token_id: BigInt(obj["Ok"]["token_id"]),
+        weddingId: weddingId
+      }
+      certificates.insert(weddingId, certificate)
+    }
+    else {
+      certificate = maybeCertificate.Some!;
+    }
+
+    console.log('certificate ' + certificate)
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 const SetRingInput = Record({
   ringBase64: text,
 })
@@ -366,6 +421,8 @@ export default Canister({
 
   setPartnerWaiting: update([], Void, setPartnerWaitingHandler),
   pay: update([], Void, payHandler),
+
+  setCertificate: update([text], Void, setCertificateHandler),
   agreeToMarry: update([], Void, agreeToMarryHandler),
 });
 

@@ -7,6 +7,7 @@ service: () -> {
     getWeddingInfoOf: (principal) -> (opt record {id:text; hadAt:nat; isRejected:bool; isPaid:bool; partner1:record {id:principal; name:text; ring:opt record {tokenId:opt nat64; data:text}; wedding:text; isAgreed:opt bool; isWaiting:bool}; partner2:opt record {id:principal; name:text; ring:opt record {tokenId:opt nat64; data:text}; wedding:text; isAgreed:opt bool; isWaiting:bool}}) query;
     pay: () -> ();
     rejectProposal: (record {weddingId:text}) -> ();
+    setCertificate: (text) -> ();
     setPartnerWaiting: () -> ();
     setRing: (record {ringBase64:text}) -> ();
 }
