@@ -53,9 +53,16 @@ const WeddingInfo = Record({
   partner2: Opt(Partner),
 });
 
+const Certificate = Record({
+  token_id: nat64,
+  weddingId: text,
+});
+
 let weddings = StableBTreeMap(text, Wedding, 1)!;
 
 let partners = StableBTreeMap(Principal, Partner, 2)!;
+
+let certificates = StableBTreeMap(text, Certificate, 3)!;
 
 let getWeddingInfoHandler = (principal) => {
   console.log(`getting wedding info`)
@@ -225,6 +232,62 @@ let createWeddingHandler = (input) => {
   }
 }
 
+let setCertificateHandler = async (weddingId: text) => {
+  const caller = ic.caller()
+  const rawArg = eval('`[{"id":${weddingId}}]`')
+
+  try {
+    const maybeWedding = weddings.get(weddingId);
+    if ('None' in maybeWedding) {
+      console.log('Wedding not found');
+      return;
+    }
+
+    const maybeCertificate = certificates.get(weddingId);
+    if ('None' in maybeCertificate) {
+      console.log('Certificate not found');
+      return;
+    }
+
+    let certificate = maybeCertificate.Some!;
+    if (certificate) {
+      console.log('Certificate already exists');
+      return;
+    }
+
+    let maybePartner = partners.get(caller)
+    if ('None' in maybePartner) {
+      console.log(`partner not found`)
+      return;
+    }
+
+    let partner = maybePartner.Some!
+    if ('Some' in partner.ring) {
+      console.log('ring already exists, token_id: ' + partner.ring.Some!.token_id)
+      return;
+    }
+
+    let result = await ic.call(nftCanister.mintDip721_text, {
+      args: [weddingPrincipal, rawArg, []]
+    });
+    console.log('result: ' + JSON.stringify(result))
+
+    let obj = JSON.parse((result as String).toString());
+    if (obj.hasOwnProperty("Err")) {
+      console.log("error!")
+      return
+    }
+    let tokenId = obj["Ok"]["token_id"];
+    certificate = {
+      token_id: BigInt(tokenId),
+      weddingId: weddingId
+    }
+    certificates.insert(weddingId, certificate)
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 const SetRingInput = Record({
   ringBase64: text,
 })
@@ -314,7 +377,9 @@ export default Canister({
   getAppVersion: query([], text, getAppVersionHandler),
 
   setPartnerWaiting: update([], Void, setPartnerWaitingHandler),
-  pay: update([], Void, payHandler)
+  pay: update([], Void, payHandler),
+
+  setCertificate: update([text], Void, setCertificateHandler),
 });
 
 
