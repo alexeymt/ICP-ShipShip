@@ -15,6 +15,10 @@ export const routes = {
     root: '/certificate',
     title: 'certificate',
   },
+  publicCertificate: {
+    root: '/public-certificate',
+    title: 'public-certificate',
+  },
   version: {
     root: '/version',
     title: 'version',

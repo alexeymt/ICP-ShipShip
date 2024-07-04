@@ -1,11 +1,14 @@
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router';
 import styled from '@emotion/styled';
 import moment from 'moment';
 
-import { Icon, Typography } from '../../components';
+import { Button, Icon, Typography,  } from '../../components';
 import { FontFamily } from '../../components/Typography/Typography.types';
 import { useStore } from '../../hooks';
 import { BlockContentContainer, COLOR_WH } from '../../styles';
 import { flexHelper } from '../../utils';
+import { routes } from '../../containers';
 
 import certificateCover from './certificate.png';
 import icp from './icp.png';
@@ -21,6 +24,7 @@ const CertificateCover = styled(BlockContentContainer)({
   height: 752,
   background: `url(${certificateCover})`,
   backgroundSize: 'contain',
+  marginTop: 20,
   padding: '35px 30px 37px 30px',
   backgroundRepeat: 'no-repeat',
 });
@@ -55,12 +59,41 @@ const CompaniesContainer = styled.div({
 });
 
 export const Certificate = () => {
+  const navigate = useNavigate();
   const { weddingInfo, myPartnerInfo, otherPartnerInfo } = useStore();
 
   const marriageDate = weddingInfo ? moment.unix(Math.floor(Number(weddingInfo.hadAt) / 10e8)) : moment(0);
 
+  const partnerName1 = breakLinesOnString(myPartnerInfo?.name || 'Tirion Lanister');
+  const partnerName2 = breakLinesOnString(otherPartnerInfo?.name || 'Daenerys Targaryen');
+  const shareDisabled: boolean = weddingInfo && weddingInfo.id ? false : true;
+
+  const handleConnect = useCallback(async () => {
+    if (!weddingInfo || !weddingInfo.id) {
+      navigate(routes.landing.root);
+    }
+    else {
+      navigate({
+        pathname: routes.publicCertificate.root,
+        search: `?weddingId=${weddingInfo.id}`,
+      })
+    }
+  }, [weddingInfo]);
+
   return (
     <PrivateRoute>
+      <BlockContentContainer css={{ maxWidth: 654 }}>
+        <Typography
+          variant="h3"
+          color="white"
+          family={FontFamily.PPMori}
+          align="center"
+          css={{ fontWeight: 600, fontSize: 26 }}
+        >
+          Congrats {partnerName1} & {partnerName2}<br />
+          on your digital "I do"! 💍✨
+        </Typography>
+      </BlockContentContainer>
       <CertificateCover>
         <Typography
           variant="h1"
@@ -82,7 +115,7 @@ export const Certificate = () => {
             align="center"
             css={{ position: 'absolute', left: '5px', maxWidth: 130, wordWrap: 'break-word' }}
           >
-            {breakLinesOnString(myPartnerInfo?.name[0] || '')}
+            {partnerName1}
           </Typography>
 
           <Typography
@@ -92,7 +125,7 @@ export const Certificate = () => {
             align="center"
             css={{ position: 'absolute', right: '-5px', maxWidth: 130, wordWrap: 'break-word' }}
           >
-            {breakLinesOnString(otherPartnerInfo?.name[0] || '')}
+            {partnerName2}
           </Typography>
         </Participants>
 
@@ -109,6 +142,20 @@ export const Certificate = () => {
           <Icon type="icp-lable" width={85} height={69} color={COLOR_WH} />
         </CompaniesContainer>
       </CertificateCover>
+      <BlockContentContainer css={{ maxWidth: 654, marginTop: 30 }}>
+        <Typography
+          variant="h3"
+          color="white"
+          family={FontFamily.PPMori}
+          align="center"
+          css={{ fontWeight: 200 }}
+        >
+          We're thrilled to celebrate your virtual union. Here's to endless love, laughter, and adventures! Cheers to the happy couple! 🎉💕
+        </Typography>
+        <div css={{ ...flexHelper({ justifyContent: 'center' }), gap: 16, marginTop: 10 }}>
+          <Button onClick={handleConnect} size="lg" variant="primary" text="Share" disabled={shareDisabled} />
+        </div>
+      </BlockContentContainer>
     </PrivateRoute>
   );
 };
