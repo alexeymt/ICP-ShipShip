@@ -1,17 +1,44 @@
-import { dashline } from '../../assets/images';
-import { GradientTypography } from '../../styles';
+import styled from '@emotion/styled';
+import { heart } from '../../assets/images';
 import { flexHelper } from '../../utils';
 import checkIcon from '../Icons/components/check.svg';
-import { Spinner } from '../Spinner';
+import { FontFamily, Typography } from '../Typography';
+import { HeartBeatAnimation } from '../../styles/animations';
 
-import { StepperCircle } from './StepperCircle';
+const StyledHeart = styled(Typography)({
+  display: 'inline-block',
+  fontSize: '130px',
+  lineHeight: '130px',
+  zIndex: 10,
+
+  animation: `${HeartBeatAnimation} 1.5s infinite`,
+});
+
+const NameWrapper = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+  backgroundImage: `url(${heart})`,
+  width: '150px',
+  height: '150px',
+  backgroundSize: 'contain',
+  backgroundRepeat: 'no-repeat',
+});
+
+const StyledName = styled(Typography)({
+  maxWidth: 150,
+  wordWrap: 'break-word',
+  width: '150px',
+  fontWeight: 'bold',
+});
 
 export const CheckLabel = () => (
   <div
     css={{
       position: 'absolute',
-      bottom: 0,
-      right: 0,
+      top: 15,
+      left: '-3px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -37,35 +64,42 @@ export type WeddingStepperProps = {
   };
 };
 
+const breakLinesOnString = (str: string) => str.replace(/\s+/g, '\n');
+
 export const WeddingStepper = ({ partner1, partner2 }: WeddingStepperProps) => {
   return (
-    <div css={{ position: 'relative', ...flexHelper({ alignItems: 'center', justifyContent: 'space-between' }) }}>
-      <StepperCircle>
-        <GradientTypography variant="body">{partner1.name}</GradientTypography>
+    <div
+      css={{
+        position: 'relative',
+        ...flexHelper({ alignItems: 'center', justifyContent: 'space-between' }),
+      }}
+    >
+      <NameWrapper>
+        <StyledName color="black" family={FontFamily.PPMori} variant="subtitle1" align="center">
+          {breakLinesOnString(partner1.name || '')}
+        </StyledName>
         {partner1.isAccepted && <CheckLabel />}
-      </StepperCircle>
+      </NameWrapper>
 
-      <StepperCircle>
-        <Spinner />
-      </StepperCircle>
+      <StyledHeart>💖</StyledHeart>
 
-      <StepperCircle>
-        <GradientTypography variant="body">{partner2.name}</GradientTypography>
+      <NameWrapper>
+        <StyledName
+          color="black"
+          family={FontFamily.PPMori}
+          variant="subtitle1"
+          align="center"
+          css={{
+            maxWidth: 150,
+            wordWrap: 'break-word',
+            width: '150px',
+            fontWeight: 'bold',
+          }}
+        >
+          {breakLinesOnString(partner2.name || '')}
+        </StyledName>
         {partner2.isAccepted && <CheckLabel />}
-      </StepperCircle>
-
-      <div
-        css={{
-          position: 'absolute',
-          zIndex: 0,
-          top: '50%',
-          height: '2px',
-          width: 'calc(100% - 10px)',
-          left: '10px',
-          backgroundImage: `url(${dashline})`,
-          transform: 'translateZ(-1px)',
-        }}
-      />
+      </NameWrapper>
     </div>
   );
 };

@@ -25,10 +25,7 @@
     "@svgr/rollup": "8.1.0",
     "@vitejs/plugin-react": "^4.1.1",
     "azle": "0.22.0",
-    "browser-image-compression": "^2.0.2",
-    "compress-base64": "^4.1.0",
     "fs": "^0.0.1-security",
-    "image-to-base64": "2.2.0",
     "rc-dialog": "9.3.4",
     "react": "^18.2.0",
     "react-copy-to-clipboard": "5.1.0",
@@ -45,7 +42,6 @@
   "devDependencies": {
     "@emotion/babel-plugin": "11.11.0",
     "@emotion/css": "11.11.2",
-    "@types/image-to-base64": "^2.1.2",
     "@types/node": "20.9.0",
     "@types/react": "18.2.37",
     "@types/react-router-dom": "^5.3.3",
