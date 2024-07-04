@@ -36,8 +36,24 @@ const useStore_ = (options = defaultOptions) => {
   const getWeddingInfoInterval = useRef<number>();
   const [weddingInfo, setWeddingInfo] = useState<Awaited<ReturnType<_WEDDING_SERVICE['getWeddingInfoOf']>>[0] | null>();
   const isPartner1 = weddingInfo?.partner1.id && principal?.compareTo(weddingInfo.partner1.id) === 'eq';
-  const myPartnerInfo = isPartner1 ? weddingInfo?.partner1 : weddingInfo?.partner2;
-  const otherPartnerInfo = isPartner1 ? weddingInfo?.partner2 : weddingInfo?.partner1;
+  let myPartnerInfo = isPartner1 ? weddingInfo?.partner1 : weddingInfo?.partner2;
+  let otherPartnerInfo = isPartner1 ? weddingInfo?.partner2 : weddingInfo?.partner1;
+
+  if (Array.isArray(myPartnerInfo)) {
+    if (myPartnerInfo.length) {
+      myPartnerInfo = myPartnerInfo[0];
+    } else {
+      myPartnerInfo = undefined;
+    }
+  }
+
+  if (Array.isArray(otherPartnerInfo)) {
+    if (otherPartnerInfo.length) {
+      otherPartnerInfo = otherPartnerInfo[0];
+    } else {
+      otherPartnerInfo = undefined;
+    }
+  }
 
   const handleGetWeddingInfo = async (weddingActor_ = weddingActor!, principal_ = principal!) => {
     try {
@@ -66,7 +82,7 @@ const useStore_ = (options = defaultOptions) => {
     const principal_ = identity_.getPrincipal();
     setPrincipal(principal_);
 
-    console.log("weddingCanisterId: " + weddingCanisterId)
+    console.log('weddingCanisterId: ' + weddingCanisterId);
 
     const weddingActor_ = createWeddingActor(weddingCanisterId, {
       agentOptions: {

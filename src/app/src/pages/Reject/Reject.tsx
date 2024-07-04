@@ -4,6 +4,7 @@ import { Typography } from '../../components';
 import { useStore } from '../../hooks';
 import { useEffect } from 'react';
 import { HeartBeatAnimation } from '../../styles/animations';
+import { useSearchParams } from 'react-router-dom';
 
 const ContentWrapper = styled.div({
   display: 'flex',
@@ -22,17 +23,20 @@ const StyledHeart = styled(Typography)({
   fontSize: '100px',
   lineHeight: '100px',
 
-  animation: `${HeartBeatAnimation} 1.5s infinite`
+  animation: `${HeartBeatAnimation} 1.5s infinite`,
 });
 
 export const Reject = () => {
-  const { myPartnerInfo, weddingActor } = useStore();
+  const [searchParams] = useSearchParams();
+  const { weddingActor } = useStore();
+  const weddingId = searchParams.get('weddingId');
+  const acceptorName = searchParams.get('acceptorName');
 
   useEffect(() => {
-    if (myPartnerInfo?.name) {
-      weddingActor.rejectMarry();
+    if (weddingId) {
+      weddingActor.rejectProposal({ weddingId });
     }
-  }, [myPartnerInfo?.name, weddingActor]);
+  }, []);
 
   return (
     <CeremonyContainer>
@@ -41,7 +45,7 @@ export const Reject = () => {
           💔
         </StyledHeart>
         <Typography align="center" variant="h3" color="black">
-          {`No worries${myPartnerInfo?.name ? ', ' : ''}${myPartnerInfo?.name || ''}!`}
+          {`No worries${acceptorName ? ', ' : ''}${acceptorName || ''}!`}
         </Typography>
         <StyledTypography align="center" variant="h3" color="black">
           Sometimes things don't go as planned, but who knows what the future holds?{' '}

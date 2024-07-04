@@ -18,8 +18,7 @@ export const Waiting = () => {
   const { myPartnerInfo, otherPartnerInfo, weddingActor, weddingInfo, handleGetWeddingInfo } = useStore();
   const [isStartCeremonyDisabled, setIsStartCeremonyDisabled] = useState(false);
 
-  console.log(JSON.stringify(myPartnerInfo));
-  console.log(JSON.stringify(otherPartnerInfo));
+  console.log(weddingInfo, myPartnerInfo, otherPartnerInfo);
 
   const handleStartCeremony = useCallback(async () => {
     try {
@@ -45,24 +44,30 @@ export const Waiting = () => {
   }, [handleNavigateChoseRing, myPartnerInfo?.isWaiting, otherPartnerInfo?.isWaiting]);
 
   useEffect(() => {
-    if (otherPartnerInfo?.isRejected) {
+    if (weddingInfo?.isRejected) {
       navigate(routes.reject.root);
     }
-  }, [otherPartnerInfo?.isRejected]);
+  }, [weddingInfo?.isRejected]);
 
   return (
     <PrivateRoute>
-      <CeremonyContainer css={{ padding: '160px 75px', minHeight: 734 }}>
+      <CeremonyContainer
+        css={{
+          padding: '160px 75px',
+          minHeight: 734,
+          backgroundImage: 'linear-gradient(to bottom, rgba(245, 230, 39, 0.4), rgba(243, 172, 163, 0.4))',
+        }}
+      >
         <GradientTypography variant="h1" css={{ marginBottom: 40 }}>
           Waiting for your partner
         </GradientTypography>
         <WeddingStepper
           partner1={{
-            name: (otherPartnerInfo?.name?.[0] ?? '?')[0],
+            name: otherPartnerInfo?.name ?? '?',
             isAccepted: !!otherPartnerInfo?.isWaiting,
           }}
           partner2={{
-            name: (myPartnerInfo?.name?.[0] ?? '?')[0],
+            name: myPartnerInfo?.name ?? '?',
             isAccepted: !!myPartnerInfo?.isWaiting,
           }}
         />

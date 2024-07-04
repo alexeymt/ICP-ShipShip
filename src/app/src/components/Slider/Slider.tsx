@@ -34,6 +34,7 @@ export const Slider = ({ onSelect, currentCollection }: SliderProps) => {
       loop={true}
       navigation={true}
       modules={[EffectCoverflow, Navigation]}
+      // slideToClickedSlide={true}
     >
       {ringsList[currentCollection].map(({ id, source }, index: number) => (
         <SwiperSlide key={id} className="swiper-no-swiping" onClick={handleRingSelect(index)}>

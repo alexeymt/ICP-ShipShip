@@ -23,17 +23,51 @@ const MainContainer = styled.div({
 
 export const Main = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo } = useStore();
+  const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo, weddingInfo } = useStore();
+
+  console.log(myPartnerInfo, otherPartnerInfo);
 
   const handleConnect = useCallback(async () => {
     if (isAuthenticated) {
-      if (myPartnerInfo && myPartnerInfo.name.length > 0) {
-        if ((myPartnerInfo?.isAgreed, otherPartnerInfo?.isAgreed)) {
-          navigate(routes.certificate.root);
+      if (weddingInfo?.id) {
+        if (myPartnerInfo && otherPartnerInfo) {
+          //with other partner
+          // both agreed to marry
+          if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {
+            console.log('here1');
+            navigate(routes.certificate.root);
+            return;
+          }
+          // one of partners agreed (any of partners started ceremony)
+          if (myPartnerInfo?.isAgreed || otherPartnerInfo?.isAgreed) {
+            console.log('here2');
+            navigate(routes.ceremony.root);
+            return;
+          }
+          // ring chosen and both partners started ceremony
+          if (myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+            navigate(routes.ceremony.root);
+            return;
+          }
+          // ring not chosen and both partners started ceremony
+          if (!myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+            navigate(routes.choose.root);
+            return;
+          }
+          //one of partners not started ceremony
+          if (!myPartnerInfo?.isWaiting || !otherPartnerInfo?.isWaiting) {
+            navigate(routes.waiting.root);
+          }
         } else {
-          navigate(routes.ceremony.root);
+          // no other partner in wedding
+          if (myPartnerInfo?.isWaiting) {
+            navigate(routes.waiting.root);
+          } else {
+            navigate(routes.connect.root);
+          }
         }
       } else {
+        // no wedding created
         navigate(routes.connect.root);
       }
     } else {

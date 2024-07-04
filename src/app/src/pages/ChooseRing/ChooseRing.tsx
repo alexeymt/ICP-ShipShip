@@ -8,6 +8,7 @@ import { useStore } from '../../hooks';
 import { Collections } from '../../components/Slider/constants';
 import { ringsList } from '../../components/Slider/images';
 import { Select } from '../../components/Select';
+import { toast } from 'react-toastify';
 
 const Container = styled.div({
   height: 'calc(100vh - 220px)',
@@ -63,22 +64,19 @@ const ChosenRingContainer = styled.div({
 
 export const ChooseRing = () => {
   const navigate = useNavigate();
-  const { otherPartnerInfo } = useStore();
+  const { weddingActor, weddingInfo } = useStore();
   const [selectedSlide, setSelectedSlide] = useState<number | null>(null);
   const [currentCollection, setCurrentCollection] = useState<string>('8bit');
   const [chosenRingSrc, setChosenRingSrc] = useState<string | null>(null);
+  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
+
+  console.log(weddingInfo);
 
   useEffect(() => {
     if (selectedSlide !== null) {
       setChosenRingSrc(ringsList[currentCollection][selectedSlide].source);
     }
   }, [selectedSlide]);
-
-  useEffect(() => {
-    if (otherPartnerInfo?.isRejected) {
-      navigate(routes.reject.root);
-    }
-  }, [otherPartnerInfo?.isRejected]);
 
   const handleRingSelect = (imageIndex: number) => {
     setSelectedSlide(imageIndex);
@@ -88,9 +86,19 @@ export const ChooseRing = () => {
     setCurrentCollection(option);
   };
 
-  const handleProceed = () => {
-    // TODO: logic to create and add ring
-    navigate(routes.ceremony.root);
+  const handleProceed = async () => {
+    console.log(chosenRingSrc);
+    setIsSubmitButtonDisabled(true);
+    try {
+      await weddingActor.setRing({ ringBase64: chosenRingSrc as string });
+      toast.success(`Ring added`);
+      navigate(routes.ceremony.root);
+    } catch (error) {
+      toast.error(`Error adding ring ${error}`);
+      console.log(`Error adding ring ${error}`);
+      setIsSubmitButtonDisabled(false);
+      return;
+    }
   };
 
   return (
@@ -114,7 +122,14 @@ export const ChooseRing = () => {
 
       <Slider onSelect={handleRingSelect} currentCollection={currentCollection} />
       <ButtonWrapper>
-        <Button onClick={handleProceed} size="lg" variant="secondary" text="Next" />
+        <Button
+          onClick={handleProceed}
+          size="lg"
+          type="submit"
+          variant="secondary"
+          text="Next"
+          disabled={!chosenRingSrc || isSubmitButtonDisabled}
+        />
       </ButtonWrapper>
     </Container>
   );

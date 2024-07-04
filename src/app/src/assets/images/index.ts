@@ -12,3 +12,4 @@ export { default as sphere } from './sphere.svg';
 export { default as eclipse } from './eclipse.svg';
 export { default as storyContent } from './story-content.png';
 export { default as speaker } from './speaker.png';
+export { default as heart } from './heart.png';
