@@ -17,7 +17,7 @@ import {
   update,
   Void,
 } from 'azle';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {
@@ -37,14 +37,14 @@ const Wedding = Record(weddingRecord);
 
 const Ring = Record({
   tokenId: Opt(nat64),
-  data: text
-})
+  data: text,
+});
 
 const Partner = Record({
   id: Principal,
   name: text,
   wedding: text,
-  isAgreed: Opt(bool),
+  isAgreed: bool,
   ring: Opt(Ring),
   isWaiting: bool,
 });
@@ -166,7 +166,7 @@ let acceptProposalHandler = (input) => {
     id: principal,
     name: input.proposeeName,
     wedding: weddingId,
-    isAgreed: None,
+    isAgreed: false,
     ring: None,
     isWaiting: false,
   };
@@ -192,7 +192,7 @@ let createWeddingHandler = (input) => {
       id: principal,
       name: input.proposerName,
       wedding: weddingId,
-      isAgreed: None,
+      isAgreed: false,
       ring: None,
       isWaiting: false,
     };
@@ -235,9 +235,9 @@ let createWeddingHandler = (input) => {
 };
 
 let setCertificateHandler = async (weddingId: text) => {
-  const caller = ic.caller()
-  const u8arr = Uint8Array.from(Buffer.from(weddingId))
-  const rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
+  const caller = ic.caller();
+  const u8arr = Uint8Array.from(Buffer.from(weddingId));
+  const rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`');
 
   try {
     const maybeWedding = weddings.get(weddingId);
@@ -250,61 +250,59 @@ let setCertificateHandler = async (weddingId: text) => {
 
     const maybeCertificate = certificates.get(weddingId);
     if ('None' in maybeCertificate) {
-      const maybePartner = partners.get(caller)
+      const maybePartner = partners.get(caller);
       if ('None' in maybePartner) {
-        console.log(`partner not found`)
+        console.log(`partner not found`);
         return;
       }
 
       const result = await ic.call(nftCanister.mintDip721_text, {
-        args: [weddingPrincipal, rawArg, []]
+        args: [weddingPrincipal, rawArg, []],
       });
-      console.log('result: ' + JSON.stringify(result))
+      console.log('result: ' + JSON.stringify(result));
 
       const obj = JSON.parse((result as String).toString());
-      if (obj.hasOwnProperty("Err")) {
-        console.log("error!")
-        return
+      if (obj.hasOwnProperty('Err')) {
+        console.log('error!');
+        return;
       }
       certificate = {
-        token_id: BigInt(obj["Ok"]["token_id"]),
-        weddingId: weddingId
-      }
-      certificates.insert(weddingId, certificate)
-    }
-    else {
+        token_id: BigInt(obj['Ok']['token_id']),
+        weddingId: weddingId,
+      };
+      certificates.insert(weddingId, certificate);
+    } else {
       certificate = maybeCertificate.Some!;
     }
 
-    console.log('certificate ' + certificate)
+    console.log('certificate ' + certificate);
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 const SetRingInput = Record({
   ringBase64: text,
 });
 
 let setRingHandler = async (input) => {
-  let caller = ic.caller()
-  let maybePartner = partners.get(caller)
+  let caller = ic.caller();
+  let maybePartner = partners.get(caller);
   if ('None' in maybePartner) {
-    console.log(`partner not found`)
+    console.log(`partner not found`);
     return;
   }
-  let partner = maybePartner.Some!
+  let partner = maybePartner.Some!;
   if ('Some' in partner.ring) {
-    console.log('ring already exists, token_id: ' + partner.ring.Some!.tokenId)
+    console.log('ring already exists, token_id: ' + partner.ring.Some!.tokenId);
     return;
   }
   const ring: typeof Ring = {
     tokenId: None,
-    data: input.ringBase64
-  }
-  partner.ring = Some(ring)
-  partners.insert(partner.id, partner)
-
+    data: input.ringBase64,
+  };
+  partner.ring = Some(ring);
+  partners.insert(partner.id, partner);
 };
 
 let setPartnerWaitingHandler = () => {
@@ -344,10 +342,10 @@ let payHandler = async () => {
   }
   let wedding = maybeWedding.Some!;
 
-  let partner = partners.get(wedding.partner1).Some!
-  await mintPartnersRingAndUpdate(partner)
-  partner = partners.get(wedding.partner2.Some!).Some!
-  await mintPartnersRingAndUpdate(partner)
+  let partner = partners.get(wedding.partner1).Some!;
+  await mintPartnersRingAndUpdate(partner);
+  partner = partners.get(wedding.partner2.Some!).Some!;
+  await mintPartnersRingAndUpdate(partner);
 
   wedding.isPaid = true;
   weddings.insert(wedding.id, wedding);
@@ -356,39 +354,38 @@ let payHandler = async () => {
 
 let mintPartnersRingAndUpdate = async (partner: typeof Partner) => {
   if ('None' in partner.ring) {
-    throw (`ring is not defined for partner: ${partner.id}`)
+    throw `ring is not defined for partner: ${partner.id}`;
   }
-  let ring = partner.ring.Some!
-  let u8arr = Uint8Array.from(Buffer.from(partner.ring.Some!.data))
-  let rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`')
-  console.log('str: ' + rawArg)
+  let ring = partner.ring.Some!;
+  let u8arr = Uint8Array.from(Buffer.from(partner.ring.Some!.data));
+  let rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`');
+  console.log('str: ' + rawArg);
   let result = await ic.call(nftCanister.mintDip721_text, {
-    args: [weddingPrincipal, rawArg, []]
+    args: [weddingPrincipal, rawArg, []],
   });
-  console.log('result: ' + JSON.stringify(result))
+  console.log('result: ' + JSON.stringify(result));
   let obj = JSON.parse((result as String).toString());
-  if (obj.hasOwnProperty("Err")) {
-    console.log("error!")
-    return
-  }
-  let tokenId = obj["Ok"]["token_id"];
-  console.log(`minted ring token: ${tokenId}`)
-  ring.tokenId = tokenId
-  partner.ring = Some(ring)
-  partners.insert(partner.id, partner)
-}
-
-let agreeToMarryHandler = () => {
-  let principal = ic.caller();
-  console.log(`principal: ${principal.toString()}`)
-  let maybePartner = partners.get(principal);
-  if ('None' in maybePartner) {
-    console.log(`partner not found ${principal.toString()}`)
+  if (obj.hasOwnProperty('Err')) {
+    console.log('error!');
     return;
   }
-  let partner = maybePartner.Some!
-  partner.isAgreed = Some(true)
-}
+  let tokenId = obj['Ok']['token_id'];
+  console.log(`minted ring token: ${tokenId}`);
+  ring.tokenId = tokenId;
+  partner.ring = Some(ring);
+  partners.insert(partner.id, partner);
+};
+
+let agreeToMarryHandler = () => {
+  const partnersOpt = partners.get(ic.caller());
+  if ('None' in partnersOpt) {
+    ic.trap('No such partner');
+    return;
+  }
+  const partner = partnersOpt.Some;
+  partner.isAgreed = true;
+  partners.insert(partner.id, partner);
+};
 
 export default Canister({
   createWedding: update([CreateWeddingInput], Opt(text), createWeddingHandler),

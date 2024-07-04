@@ -11,8 +11,10 @@ import { PrivateRoute } from '../../auth';
 
 export const Ceremony = () => {
   const navigate = useNavigate();
-  const { myPartnerInfo, otherPartnerInfo, weddingActor } = useStore();
+  const { myPartnerInfo, otherPartnerInfo, weddingActor, weddingInfo } = useStore();
   const [isAgreeToMerryDisabled, setIsAgreeToMerryDisabled] = useState(false);
+
+  console.log(weddingInfo);
 
   const handleAgreeToMarry = useCallback(async () => {
     try {
@@ -37,17 +39,11 @@ export const Ceremony = () => {
     }
   }, [handleNavigateCertificate, myPartnerInfo?.isAgreed, otherPartnerInfo?.isAgreed]);
 
-  useEffect(() => {
-    if (otherPartnerInfo?.isRejected) {
-      navigate(routes.reject.root);
-    }
-  }, [otherPartnerInfo?.isRejected]);
-
   return (
     <PrivateRoute>
       <CeremonyContainer css={{ padding: '160px 75px', minHeight: 734 }}>
         <GradientTypography variant="h1" css={{ marginBottom: 40 }}>
-          Waiting for your partner
+          Exchanging Vows Ceremony
         </GradientTypography>
         <WeddingStepper
           partner1={{
