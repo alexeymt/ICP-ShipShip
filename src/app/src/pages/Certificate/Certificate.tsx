@@ -73,11 +73,10 @@ export const Certificate = () => {
       navigate(routes.landing.root);
     }
     else {
-      navigate(routes.publicCertificate.root, { state: { weddingId: weddingInfo?.id } });
       navigate({
-      pathname: routes.publicCertificate.root,
-      search: `?weddingId=${weddingInfo.id}`,
-    })
+        pathname: routes.publicCertificate.root,
+        search: `?weddingId=${weddingInfo.id}`,
+      })
     }
   }, [weddingInfo]);
 
