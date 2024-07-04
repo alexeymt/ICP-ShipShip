@@ -18,8 +18,7 @@ export const Waiting = () => {
   const { myPartnerInfo, otherPartnerInfo, weddingActor, weddingInfo, handleGetWeddingInfo } = useStore();
   const [isStartCeremonyDisabled, setIsStartCeremonyDisabled] = useState(false);
 
-  console.log(JSON.stringify(myPartnerInfo));
-  console.log(JSON.stringify(otherPartnerInfo));
+  console.log(weddingInfo, myPartnerInfo, otherPartnerInfo);
 
   const handleStartCeremony = useCallback(async () => {
     try {
@@ -45,10 +44,10 @@ export const Waiting = () => {
   }, [handleNavigateChoseRing, myPartnerInfo?.isWaiting, otherPartnerInfo?.isWaiting]);
 
   useEffect(() => {
-    if (otherPartnerInfo?.isRejected) {
+    if (weddingInfo?.isRejected) {
       navigate(routes.reject.root);
     }
-  }, [otherPartnerInfo?.isRejected]);
+  }, [weddingInfo?.isRejected]);
 
   return (
     <PrivateRoute>

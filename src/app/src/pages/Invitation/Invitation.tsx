@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { useNavigate } from 'react-router';
-import { useSearchParams } from 'react-router-dom';
+import { createSearchParams, useSearchParams } from 'react-router-dom';
 import { CeremonyContainer } from '../../styles';
-import { Button, Spinner, Typography } from '../../components';
+import { Button, Typography } from '../../components';
 import { routes } from '../../containers';
 import { useStore } from '../../hooks';
 import { useCallback, useEffect, useState } from 'react';
@@ -47,58 +47,62 @@ const ButtonsWrapper = styled.div({
   display: 'flex',
 });
 
-const SpinnerWrapper = styled.div({
-  position: 'absolute',
-  top: '50%',
-  right: '50%',
-});
-
 export const Invitation = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [showSpinner, setShowSpinner] = useState(false);
   const [isAcceptButtonDisabled, setIsAcceptButtonDisabled] = useState(false);
   const [isAcceptButtonClicked, setIsAcceptButtonClicked] = useState(false);
-  const partnerName = searchParams.get('partnerName');
-  const myName = searchParams.get('myName');
+  const acceptorName = searchParams.get('acceptorName');
+  const proposerName = searchParams.get('proposerName');
   const weddingId = searchParams.get('weddingId');
 
   const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo, weddingInfo, weddingActor, handleGetWeddingInfo } =
     useStore();
+
   console.log(weddingInfo, weddingId);
 
   useEffect(() => {
     async function implementLogic() {
       if (isAuthenticated && isAcceptButtonClicked) {
         if (weddingInfo?.id) {
-          // wedding is created before
-          if (myPartnerInfo && myPartnerInfo?.name.length > 0) {
-            // both partners agreed
+          if (myPartnerInfo && otherPartnerInfo) {
+            //with other partner
+            // both agreed to marry
             if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {
               navigate(routes.certificate.root);
+              return;
             }
-
-            // one of partners agreed
+            // one of partners agreed (any of partners started ceremony)
             if (myPartnerInfo?.isAgreed || otherPartnerInfo?.isAgreed) {
               navigate(routes.ceremony.root);
+              return;
             }
-
+            // ring chosen and both partners started ceremony
+            if (myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+              navigate(routes.ceremony.root);
+              return;
+            }
             // ring not chosen and both partners started ceremony
-            if (!myPartnerInfo?.ring && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+            if (!myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
               navigate(routes.choose.root);
+              return;
             }
-
             //one of partners not started ceremony
             if (!myPartnerInfo?.isWaiting || !otherPartnerInfo?.isWaiting) {
               navigate(routes.waiting.root);
             }
           } else {
-            navigate(routes.connect.root);
+            // no other partner in wedding
+            if (myPartnerInfo?.isWaiting) {
+              navigate(routes.waiting.root);
+            } else {
+              navigate(routes.connect.root);
+            }
           }
         } else {
           setIsAcceptButtonDisabled(true);
           try {
-            await weddingActor.acceptProposal({ proposeeName: myName!, weddingId: weddingId! });
+            await weddingActor.acceptProposal({ proposeeName: acceptorName!, weddingId: weddingId! });
           } catch (error) {
             toast.error(`Unable to connect wedding due to error: ${JSON.stringify(error)}`);
             setIsAcceptButtonDisabled(false);
@@ -120,35 +124,33 @@ export const Invitation = () => {
     if (!isAuthenticated) {
       await login();
       await handleGetWeddingInfo();
+      setIsAcceptButtonDisabled(false);
     }
   }, [isAuthenticated, login]);
 
-  const handleReject = useCallback(async () => {
-    if (isAuthenticated) {
-      navigate(routes.reject.root);
-    } else {
-      await login().then(() => {
-        navigate(routes.reject.root);
+  const handleRejectButtonClick = useCallback(async () => {
+    if (weddingId && acceptorName) {
+      navigate({
+        pathname: routes.reject.root,
+        search: createSearchParams({
+          weddingId,
+          acceptorName,
+        }).toString(),
       });
     }
-  }, [isAuthenticated, login, navigate]);
+  }, [navigate]);
 
   return (
     <CeremonyContainer>
-      {showSpinner && (
-        <SpinnerWrapper>
-          <Spinner />
-        </SpinnerWrapper>
-      )}
       <ContentWrapper>
-        {(!myName || !partnerName || !weddingId) && (
+        {(!proposerName || !acceptorName || !weddingId) && (
           <Typography align="center" variant="h3" color="black">
             Wrong link
           </Typography>
         )}
-        {myName && partnerName && weddingId && (
+        {proposerName && acceptorName && weddingId && (
           <>
-            <StyledName align="center" variant="h1" color="black">{`Hey ${partnerName}!`}</StyledName>
+            <StyledName align="center" variant="h1" color="black">{`Hey ${acceptorName}!`}</StyledName>
             <StyledInvitation align="center" variant="h2" color="black">
               Ready to take our digital romance
               <br /> to the next level? 🌟
@@ -158,7 +160,7 @@ export const Invitation = () => {
               official and build something beautiful together. 💖🚀
             </StyledTypography>
             <StyledMyName align="center" variant="h1" color="black">
-              {myName}
+              {proposerName}
             </StyledMyName>
             <ButtonsWrapper>
               <Button
@@ -169,7 +171,13 @@ export const Invitation = () => {
                 onClick={handleAcceptButtonClick}
                 disabled={isAcceptButtonDisabled}
               />
-              <Button type="button" variant="primary" text="Reject" sx={buttonStyles} onClick={handleReject} />
+              <Button
+                type="button"
+                variant="primary"
+                text="Reject"
+                sx={buttonStyles}
+                onClick={handleRejectButtonClick}
+              />
             </ButtonsWrapper>
           </>
         )}

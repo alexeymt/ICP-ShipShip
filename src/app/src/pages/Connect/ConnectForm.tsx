@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useCallback, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -19,12 +19,21 @@ const buttonStyles = {
 
 export const Form = () => {
   const navigate = useNavigate();
-  const { weddingActor, handleGetWeddingInfo, weddingInfo, myPartnerInfo } = useStore();
+  const { weddingActor, handleGetWeddingInfo, weddingInfo, myPartnerInfo, otherPartnerInfo } = useStore();
   const [myName, setMyName] = useState('');
   const [myPartnerName, setMyPartnerName] = useState('');
-  const [isNameInputDisabled, setIsNameInputDisabled] = useState(false);
+  const [isActionsDisabled, setIsActionsDisabled] = useState(false);
 
   console.log(weddingInfo);
+
+  useEffect(() => {
+    if (myPartnerInfo?.name) {
+      setMyName(myPartnerInfo?.name);
+    }
+    if (otherPartnerInfo?.name) {
+      setMyPartnerName(otherPartnerInfo?.name);
+    }
+  }, []);
 
   const handleMyNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setMyName(event.target.value);
@@ -36,30 +45,30 @@ export const Form = () => {
 
   const handleNameInputOnBlur = useCallback(async () => {
     if (!weddingInfo?.id && myName.length) {
-      setIsNameInputDisabled(true);
+      setIsActionsDisabled(true);
       try {
         await weddingActor.createWedding({ proposerName: myName });
       } catch (error) {
         toast.error(`Unable to create wedding due to error: ${JSON.stringify(error)}`);
-        setIsNameInputDisabled(false);
+        setIsActionsDisabled(false);
         return;
       }
       await handleGetWeddingInfo();
-      setIsNameInputDisabled(false);
+      setIsActionsDisabled(false);
       toast.success('Wedding created successfully');
     }
 
     if (weddingInfo?.id && myName.length && !Array.isArray(myPartnerInfo) && myName !== myPartnerInfo?.name) {
-      setIsNameInputDisabled(true);
+      setIsActionsDisabled(true);
       try {
         await weddingActor.updatePartnerName(myName);
       } catch (error) {
         toast.error(`Unable to update name due to error: ${JSON.stringify(error)}`);
-        setIsNameInputDisabled(false);
+        setIsActionsDisabled(false);
         return;
       }
       await handleGetWeddingInfo();
-      setIsNameInputDisabled(false);
+      setIsActionsDisabled(false);
       toast.success('Name updated successfully');
     }
   }, [myName, weddingActor, weddingInfo?.id, myPartnerInfo, handleGetWeddingInfo]);
@@ -72,35 +81,36 @@ export const Form = () => {
   return (
     <CeremonyContainer>
       <GradientTypography variant="h1">Connect</GradientTypography>
-      <form onSubmit={handleNavigateToWaitingPage}>
-        <Input
-          title="Your name"
-          onChange={handleMyNameChange}
-          onBlur={handleNameInputOnBlur}
-          placeholder="Xiao Yan"
-          sx={{ marginTop: 39 }}
-          disabled={isNameInputDisabled}
-        />
-        <Input
-          title="Your partner’s name"
-          onChange={handleMyPartnerNameChange}
-          placeholder="Ashley Green"
-          sx={{ marginTop: 20 }}
-        />
-        <ShareLink
-          title="Invite your partner to connect"
-          description="Copy link and share it with your sweetheart"
-          link={`/invitation?partnerName=${myPartnerName}&myName=${myName}&weddingId=${weddingInfo?.id}`}
-          disabled={myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
-        />
-        <Button
-          type="submit"
-          variant="secondary"
-          text="Get Connected"
-          sx={buttonStyles}
-          disabled={myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
-        />
-      </form>
+      <Input
+        title="Your name"
+        onChange={handleMyNameChange}
+        onBlur={handleNameInputOnBlur}
+        placeholder="Xiao Yan"
+        sx={{ marginTop: 39 }}
+        disabled={isActionsDisabled}
+        value={myName}
+      />
+      <Input
+        title="Your partner’s name"
+        onChange={handleMyPartnerNameChange}
+        placeholder="Ashley Green"
+        sx={{ marginTop: 20 }}
+        value={myPartnerName}
+      />
+      <ShareLink
+        title="Invite your partner to connect"
+        description="Copy link and share it with your sweetheart"
+        link={`/invitation?acceptorName=${myPartnerName}&proposerName=${myName}&weddingId=${weddingInfo?.id}`}
+        disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
+      />
+      <Button
+        type="submit"
+        variant="secondary"
+        text="Get Connected"
+        sx={buttonStyles}
+        disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
+        onClick={handleNavigateToWaitingPage}
+      />
     </CeremonyContainer>
   );
 };
