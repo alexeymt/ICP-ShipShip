@@ -38,11 +38,20 @@ const ICP = styled.img({
   zIndex: 0,
 });
 
+const RingImage = styled.img({
+  maxWidth: 50,
+  width: '100%',
+  position: 'relative',
+  right: '0%',
+  top: 0,
+  zIndex: 0,
+});
+
 const Participants = styled.div({
   position: 'relative',
   width: '100%',
   ...flexHelper({ alignItems: 'center', justifyContent: 'center' }),
-  marginTop: 75,
+  marginTop: 15,
   '& > *': {
     zIndex: 10,
     transformStyle: 'preserve-3d',
@@ -64,8 +73,8 @@ export const Certificate = () => {
 
   const marriageDate = weddingInfo ? moment.unix(Math.floor(Number(weddingInfo.hadAt) / 10e8)) : moment(0);
 
-  const partnerName1 = breakLinesOnString(myPartnerInfo?.name || 'Tirion Lanister');
-  const partnerName2 = breakLinesOnString(otherPartnerInfo?.name || 'Daenerys Targaryen');
+  const partnerName1 = breakLinesOnString(myPartnerInfo?.name || '');
+  const partnerName2 = breakLinesOnString(otherPartnerInfo?.name || '');
   const shareDisabled: boolean = weddingInfo && weddingInfo.id ? false : true;
 
   const handleConnect = useCallback(async () => {
@@ -107,14 +116,13 @@ export const Certificate = () => {
 
         <Participants>
           <ICP src={icp} alt="icp" />
-
           <Typography
             color="white"
             family={FontFamily.PPMori}
             variant="subtitle1"
             align="center"
             css={{ position: 'absolute', left: '5px', maxWidth: 130, wordWrap: 'break-word' }}
-          >
+            >
             {partnerName1}
           </Typography>
 
@@ -127,6 +135,17 @@ export const Certificate = () => {
           >
             {partnerName2}
           </Typography>
+
+          <RingImage
+            src={myPartnerInfo?.ring[0]?.data}
+            alt="ring"
+            css={{ position: 'absolute', left: '5px', top: '100px', }}
+          />
+          <RingImage
+            src={otherPartnerInfo?.ring[0]?.data}
+            alt="ring"
+            css={{ position: 'absolute', left: '310px', top: '100px', }}
+          />
         </Participants>
 
         <Typography color="white" variant="body" align="center" css={{ marginTop: 72 }}>
