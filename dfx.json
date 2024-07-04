@@ -9,7 +9,25 @@
           "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
         }
       },
-      "frontend": {}
+      "frontend": {},
+      "specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+    },
+    "icp_ledger_canister": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/b6c3687fb3a03ca65fcd49f0aadc499367904c8b/rs/rosetta-api/icp_ledger/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/b6c3687fb3a03ca65fcd49f0aadc499367904c8b/canisters/ledger-canister.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        }
+      },
+      "specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+    },
+    "dip721_nft_container": {
+      "type": "rust",
+      "candid": "src/dip721-nft-container/dip721-nft-container.did",
+      "package": "dip721_nft_container",
+      "specified_id": "br5f7-7uaaa-aaaaa-qaaca-cai"
     },
     "wedding": {
       "type": "custom",
@@ -17,19 +35,14 @@
       "build": "npx azle wedding",
       "candid": "src/wedding/wedding.did",
       "wasm": ".azle/wedding/wedding.wasm",
-      "gzip": true
+      "gzip": true,
+      "specified_id": "bw4dl-smaaa-aaaaa-qaacq-cai"
     },
     "app": {
       "type": "assets",
       "build": "yarn build",
       "source": ["src/app/dist"],
       "frontend": {}
-    },
-    "dip721_nft_container": {
-      "type": "rust",
-      "candid": "src/dip721-nft-container/dip721-nft-container.did",
-      "package": "dip721_nft_container",
-      "init_arg": "(record {name = \"Ship-Ship Rings\";logo=null;symbol=\"SSRNG\";custodians = opt vec { principal \"bw4dl-smaaa-aaaaa-qaacq-cai\" };})"
     }
   },
   "defaults": {

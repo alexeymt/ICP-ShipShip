@@ -11,5 +11,6 @@ service: () -> {
     rejectProposal: (record {weddingId:text}) -> ();
     setPartnerWaiting: () -> ();
     setRing: (record {ringBase64:text}) -> ();
+    testPay: () -> ();
     updatePartnerName: (text) -> ();
 }
