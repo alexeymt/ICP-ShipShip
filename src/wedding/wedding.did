@@ -1,6 +1,7 @@
 service: () -> {
     acceptProposal: (record {proposeeName:text; weddingId:text}) -> ();
     agreeToMarry: () -> ();
+    checkCompatibility: (text, text) -> (opt record {weaknesses:vec text; strengths:vec text; compatibility:text}) query;
     createWedding: (record {proposerName:text}) -> (opt text);
     getAppVersion: () -> (text) query;
     getPartnerInfo: (principal) -> (opt record {id:principal; name:text; ring:opt record {tokenId:opt nat64; data:text}; wedding:text; isAgreed:bool; isWaiting:bool}) query;

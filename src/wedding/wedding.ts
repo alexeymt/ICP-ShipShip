@@ -14,10 +14,11 @@ import {
   Some,
   StableBTreeMap,
   text,
-  update,
+  update, Vec,
   Void,
 } from 'azle';
 import { v4 as uuidv4 } from 'uuid';
+import { zodiacTable, zodiacSigns, compatibilityTable } from './zodiacCompatibility';
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {
@@ -53,6 +54,12 @@ const WeddingInfo = Record({
   ...weddingRecord,
   partner1: Partner,
   partner2: Opt(Partner),
+});
+
+const CompatibilityResult = Record({
+  compatibility: text,
+  strengths: Vec(text),
+  weaknesses: Vec(text),
 });
 
 const Certificate = Record({
@@ -387,6 +394,62 @@ let agreeToMarryHandler = () => {
   partners.insert(partner.id, partner);
 };
 
+let checkCompatibilityHandler = (dateOfBirth1: text, dateOfBirth2: text) => {
+  const calcLifePathNumber = (value: string) => {
+    let sum = 0;
+
+    value.split('').forEach((x) => {
+      sum += parseInt(x);
+    });
+
+    if (sum > 9) {
+      return calcLifePathNumber(sum.toString());
+    }
+
+      return sum;
+  };
+
+  const determineZodiacSign = (dateOfBirth: string) => {
+    const month = parseInt(dateOfBirth.slice(4, 6));
+    const day = parseInt(dateOfBirth.slice(6, 8));
+
+    for (let i = 0; i < zodiacSigns.length; i++) {
+        let sign = zodiacSigns[i];
+        let start = sign.start;
+        let end = sign.end;
+
+        if ((month === start.month && day >= start.day) ||
+            (month === end.month && day <= end.day) ||
+            (month > start.month && month < end.month)) {
+            return sign.sign;
+        }
+    }
+
+    return null;
+  };
+
+  const zodiacSign1 = determineZodiacSign(dateOfBirth1);
+  const zodiacSign2 = determineZodiacSign(dateOfBirth2);
+
+  if (zodiacSign1 === null || zodiacSign2 === null) {
+    return None;
+  }
+
+  const zodiac_compatibility = zodiacTable[zodiacSign1][zodiacSign2];
+
+  const lifePathNumber1 = calcLifePathNumber(dateOfBirth1);
+  const lifePathNumber2 = calcLifePathNumber(dateOfBirth2);
+  const lifePathNumberCompatibility = compatibilityTable[`${lifePathNumber1},${lifePathNumber2}`]
+    || compatibilityTable[`${lifePathNumber2},${lifePathNumber1}`]
+    || 'Neutral Compatibility';
+
+  return Some({
+    compatibility: lifePathNumberCompatibility,
+    strengths: zodiac_compatibility.strengths,
+    weaknesses: zodiac_compatibility.weaknesses,
+  });
+};
+
 export default Canister({
   createWedding: update([CreateWeddingInput], Opt(text), createWeddingHandler),
   updatePartnerName: update([text], Void, updatePartnerNameHandler),
@@ -404,7 +467,10 @@ export default Canister({
 
   setCertificate: update([text], Void, setCertificateHandler),
   agreeToMarry: update([], Void, agreeToMarryHandler),
+
+  checkCompatibility: query([text, text], Opt(CompatibilityResult), checkCompatibilityHandler),
 });
+
 
 globalThis.crypto = {
   // @ts-expect-error Uint8Array is compatible with ArrayBufferView
