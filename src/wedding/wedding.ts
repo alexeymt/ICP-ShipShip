@@ -50,11 +50,6 @@ const Partner = Record({
   isWaiting: bool,
 });
 
-const Ring = Record({
-  token_id: nat64,
-  data: text
-})
-
 const WeddingInfo = Record({
   ...weddingRecord,
   partner1: Partner,
