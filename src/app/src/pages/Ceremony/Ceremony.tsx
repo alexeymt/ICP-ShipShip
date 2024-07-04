@@ -41,17 +41,23 @@ export const Ceremony = () => {
 
   return (
     <PrivateRoute>
-      <CeremonyContainer css={{ padding: '160px 75px', minHeight: 734 }}>
+      <CeremonyContainer
+        css={{
+          padding: '160px 75px',
+          minHeight: 734,
+          backgroundImage: 'linear-gradient(to bottom, rgba(245, 230, 39, 0.4), rgba(243, 172, 163, 0.4))',
+        }}
+      >
         <GradientTypography variant="h1" css={{ marginBottom: 40 }}>
           Exchanging Vows Ceremony
         </GradientTypography>
         <WeddingStepper
           partner1={{
-            name: (otherPartnerInfo?.name?.[0] ?? '?')[0],
+            name: otherPartnerInfo?.name ?? '?',
             isAccepted: !!otherPartnerInfo?.isAgreed,
           }}
           partner2={{
-            name: (myPartnerInfo?.name?.[0] ?? '?')[0],
+            name: myPartnerInfo?.name ?? '?',
             isAccepted: !!myPartnerInfo?.isAgreed,
           }}
         />

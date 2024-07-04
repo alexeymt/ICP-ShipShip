@@ -8,9 +8,6 @@ import { useStore } from '../../hooks';
 import { Collections } from '../../components/Slider/constants';
 import { ringsList } from '../../components/Slider/images';
 import { Select } from '../../components/Select';
-import imageToBase64 from 'image-to-base64/browser';
-import imageCompression from 'browser-image-compression';
-import compress from 'compress-base64';
 import { toast } from 'react-toastify';
 
 const Container = styled.div({
@@ -65,17 +62,13 @@ const ChosenRingContainer = styled.div({
   minWidth: '140px',
 });
 
-const compressionOptions = {
-  maxSizeMB: 0.2,
-  useWebWorker: false,
-};
-
 export const ChooseRing = () => {
   const navigate = useNavigate();
-  const { otherPartnerInfo, weddingActor, weddingInfo } = useStore();
+  const { weddingActor, weddingInfo } = useStore();
   const [selectedSlide, setSelectedSlide] = useState<number | null>(null);
   const [currentCollection, setCurrentCollection] = useState<string>('8bit');
   const [chosenRingSrc, setChosenRingSrc] = useState<string | null>(null);
+  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
 
   console.log(weddingInfo);
 
@@ -95,31 +88,17 @@ export const ChooseRing = () => {
 
   const handleProceed = async () => {
     console.log(chosenRingSrc);
-    // compress(chosenRingSrc!, {
-    //   max: 200,
-    //   type: 'image/png',
-    //   quality: 0.7,
-    // }).then((result) => {
-    //   console.log(result);
-    // });
-    // imageToBase64(chosenRingSrc)
-    //   .then(async (response) => {
-    //     // console.log(response);
-    //     try {
-    //       await weddingActor.setRing({ ringBase64: response });
-    //       toast.success(`Ring added to NFT container`);
-    //       navigate(routes.ceremony.root);
-    //     } catch (error) {
-    //       toast.error(`Error adding ring ${error}`);
-    //       console.log(`Error adding ring ${error}`);
-    //       navigate(routes.ceremony.root);
-    //       return;
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     toast.error(`Error creating ring in base64 format`);
-    //   });
-    navigate(routes.ceremony.root);
+    setIsSubmitButtonDisabled(true);
+    try {
+      await weddingActor.setRing({ ringBase64: chosenRingSrc as string });
+      toast.success(`Ring added`);
+      navigate(routes.ceremony.root);
+    } catch (error) {
+      toast.error(`Error adding ring ${error}`);
+      console.log(`Error adding ring ${error}`);
+      setIsSubmitButtonDisabled(false);
+      return;
+    }
   };
 
   return (
@@ -149,7 +128,7 @@ export const ChooseRing = () => {
           type="submit"
           variant="secondary"
           text="Next"
-          disabled={!chosenRingSrc}
+          disabled={!chosenRingSrc || isSubmitButtonDisabled}
         />
       </ButtonWrapper>
     </Container>
