@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Navigation } from 'swiper/modules';
 import { ringsList } from './images';
@@ -10,15 +9,13 @@ import 'swiper/css/navigation';
 import './styles.scss';
 
 interface SliderProps {
-  onChange: (index: number) => void;
+  currentCollection: string;
+  onSelect: (imageIndex: number) => void;
 }
 
-export const Slider = ({ onChange }: SliderProps) => {
-  // const [currentSlide, setCurrentSlide] = useState(3);
-  // console.log(currentSlide);
-
-  const handleSlideChange = (event: { realIndex: number }) => {
-    onChange(event.realIndex);
+export const Slider = ({ onSelect, currentCollection }: SliderProps) => {
+  const handleRingSelect = (index: number) => () => {
+    onSelect(index);
   };
 
   return (
@@ -28,7 +25,6 @@ export const Slider = ({ onChange }: SliderProps) => {
       initialSlide={3}
       centeredSlides={true}
       slidesPerView={3.225}
-      // slidesPerGroup={5}
       coverflowEffect={{
         rotate: 0,
         stretch: 0,
@@ -38,10 +34,10 @@ export const Slider = ({ onChange }: SliderProps) => {
       loop={true}
       navigation={true}
       modules={[EffectCoverflow, Navigation]}
-      onSlideChange={handleSlideChange}
+      // slideToClickedSlide={true}
     >
-      {ringsList.map(({ id, source }) => (
-        <SwiperSlide key={id} className="swiper-no-swiping">
+      {ringsList[currentCollection].map(({ id, source }, index: number) => (
+        <SwiperSlide key={id} className="swiper-no-swiping" onClick={handleRingSelect(index)}>
           <img src={source} />
         </SwiperSlide>
       ))}

@@ -17,8 +17,7 @@
       "build": "npx azle wedding",
       "candid": "src/wedding/wedding.did",
       "wasm": ".azle/wedding/wedding.wasm",
-      "gzip": true,
-      "post_install": ["dfx generate"]
+      "gzip": true
     },
     "app": {
       "type": "assets",
