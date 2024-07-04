@@ -17,6 +17,7 @@ import {
   update,
   Void,
 } from 'azle';
+import { get } from 'http';
 import {v4 as uuidv4} from 'uuid';
 
 // eslint-disable-next-line no-extend-native, func-names
@@ -56,7 +57,7 @@ const WeddingInfo = Record({
 });
 
 const Certificate = Record({
-  token_id: nat64,
+  tokenId: nat64,
   weddingId: text,
 });
 
@@ -234,6 +235,37 @@ let createWeddingHandler = (input) => {
   }
 };
 
+let getCertificateHandler = async (weddingId: text) => {
+  const maybeWedding = weddings.get(weddingId);
+  if ('None' in maybeWedding) {
+    console.log('maybeWedding: ' + maybeWedding);
+    console.log('wedding not found: ' + weddingId.toString());
+    return None;
+  }
+  const wedding = maybeWedding.Some!;
+  console.log('wedding: ' + JSON.stringify(wedding));
+  if (wedding.isPaid || wedding.isRejected) {
+    console.log('certificate has invalid status' + JSON.stringify(wedding));
+    return None;
+  }
+
+  let maybePartner = partners.get(wedding.partner1)
+  if ('None' in maybePartner) {
+    console.log(`partner1 not found`)
+    return None;
+  }
+  const partner1 = maybePartner.Some!
+
+  let partner2: Opt<typeof Partner> = None;
+  if ('Some' in wedding.partner2) {
+    partner2 = partners.get(wedding.partner2.Some!);
+  }
+
+  return Some(
+    { ...wedding, partner1, partner2 }, // as any
+  );
+};
+
 let setCertificateHandler = async (weddingId: text) => {
   const caller = ic.caller()
   const u8arr = Uint8Array.from(Buffer.from(weddingId))
@@ -267,7 +299,7 @@ let setCertificateHandler = async (weddingId: text) => {
         return
       }
       certificate = {
-        token_id: BigInt(obj["Ok"]["token_id"]),
+        tokenId: obj["Ok"]["token_id"],
         weddingId: weddingId
       }
       certificates.insert(weddingId, certificate)
@@ -348,6 +380,7 @@ let payHandler = async () => {
   await mintPartnersRingAndUpdate(partner)
   partner = partners.get(wedding.partner2.Some!).Some!
   await mintPartnersRingAndUpdate(partner)
+  await setCertificateHandler(wedding.id)
 
   wedding.isPaid = true;
   weddings.insert(wedding.id, wedding);
@@ -405,8 +438,9 @@ export default Canister({
   setPartnerWaiting: update([], Void, setPartnerWaitingHandler),
   pay: update([], Void, payHandler),
 
-  setCertificate: update([text], Void, setCertificateHandler),
   agreeToMarry: update([], Void, agreeToMarryHandler),
+
+  getCertificate: query([text], Opt(WeddingInfo), getCertificateHandler),
 });
 
 globalThis.crypto = {

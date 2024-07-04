@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import {
   Ceremony,
   Certificate,
+  PublicCertificate,
   ChooseRing,
   Connect,
   Invitation,
@@ -28,6 +29,7 @@ export const LayoutRoutes: FC = () => {
       <Route path={routes.reject.root} element={<Reject />} />
       <Route path={routes.waiting.root} element={<Waiting />} />
       <Route path={routes.payment.root} element={<Payment />} />
+      <Route path={routes.publicCertificate.root} element={<PublicCertificate />} />
     </Routes>
   );
 };
