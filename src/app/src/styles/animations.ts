@@ -25,4 +25,26 @@ export const HeartBeatAnimation = keyframes`
   {
     transform: scale( .75 );
   }
-`
+`;
+
+export const LeftHeartAnimation = keyframes`
+  0%
+  {
+    transform: translate(0);
+  }
+  100%
+  {
+    transform: translate(200px);
+  }
+`;
+
+export const RightHeartAnimation = keyframes`
+  0%
+  {
+    transform: translate(0);
+  }
+  100%
+  {
+    transform: translate(-200px);
+  }
+`;

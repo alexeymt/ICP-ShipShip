@@ -8,13 +8,32 @@ import { useStore } from '../../hooks';
 import { CeremonyContainer, GradientTypography } from '../../styles';
 import { sleep } from '../../utils';
 import { PrivateRoute } from '../../auth';
+import styled from '@emotion/styled';
+import { LeftHeartAnimation, RightHeartAnimation } from '../../styles/animations';
 
 export const Ceremony = () => {
   const navigate = useNavigate();
-  const { myPartnerInfo, otherPartnerInfo, weddingActor, weddingInfo } = useStore();
+  const { myPartnerInfo, otherPartnerInfo, weddingActor } = useStore();
   const [isAgreeToMerryDisabled, setIsAgreeToMerryDisabled] = useState(false);
+  const [isHeartsOpen, setIsHeartsOpen] = useState(false);
 
-  console.log(weddingInfo);
+  const StyledLeftHeart = styled(Typography)({
+    display: 'inline-block',
+    fontSize: '160px',
+    lineHeight: '160px',
+    zIndex: 10,
+
+    animation: `${LeftHeartAnimation} 4s`,
+  });
+
+  const StyledRightHeart = styled(Typography)({
+    display: 'inline-block',
+    fontSize: '160px',
+    lineHeight: '160px',
+    zIndex: 10,
+
+    animation: `${RightHeartAnimation} 4s`,
+  });
 
   const handleAgreeToMarry = useCallback(async () => {
     try {
@@ -28,7 +47,9 @@ export const Ceremony = () => {
   }, [weddingActor]);
 
   const handleNavigateCertificate = useCallback(async () => {
-    await sleep(2000);
+    setIsHeartsOpen(true);
+    await sleep(3800);
+    setIsHeartsOpen(false);
     toast.success('You have been married');
     navigate(routes.certificate.root);
   }, [navigate]);
@@ -46,8 +67,20 @@ export const Ceremony = () => {
           padding: '160px 75px',
           minHeight: 734,
           backgroundImage: 'linear-gradient(to bottom, rgba(245, 230, 39, 0.4), rgba(243, 172, 163, 0.4))',
+          position: 'relative',
         }}
       >
+        {isHeartsOpen && (
+          <>
+            <div style={{ position: 'absolute', top: 100, left: 0 }}>
+              <StyledLeftHeart>❤️‍🔥</StyledLeftHeart>
+            </div>
+            <div style={{ position: 'absolute', top: 100, right: 0 }}>
+              <StyledRightHeart>❤️‍🔥</StyledRightHeart>
+            </div>
+          </>
+        )}
+
         <GradientTypography variant="h1" css={{ marginBottom: 40 }}>
           Exchanging Vows Ceremony
         </GradientTypography>
