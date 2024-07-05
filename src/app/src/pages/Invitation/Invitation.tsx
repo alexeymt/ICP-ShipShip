@@ -63,7 +63,7 @@ export const Invitation = () => {
 
   useEffect(() => {
     async function implementLogic() {
-      if (isAuthenticated && isAcceptButtonClicked) {
+      if (isAuthenticated) {
         if (weddingInfo?.id) {
           if (myPartnerInfo && otherPartnerInfo) {
             //with other partner
@@ -115,7 +115,9 @@ export const Invitation = () => {
         }
       }
     }
-    implementLogic();
+    if (isAcceptButtonClicked) {
+      implementLogic();
+    }
   }, [isAuthenticated, isAcceptButtonClicked, myPartnerInfo, otherPartnerInfo, weddingInfo, navigate]);
 
   const handleAcceptButtonClick = useCallback(async () => {

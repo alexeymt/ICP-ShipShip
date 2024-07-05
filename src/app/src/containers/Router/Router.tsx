@@ -11,6 +11,7 @@ import {
   Payment,
   Reject,
   Version,
+  VibeCheck,
   Waiting,
 } from '../../pages';
 import { routes } from './routes';
@@ -29,6 +30,7 @@ export const LayoutRoutes: FC = () => {
       <Route path={routes.reject.root} element={<Reject />} />
       <Route path={routes.waiting.root} element={<Waiting />} />
       <Route path={routes.payment.root} element={<Payment />} />
+      <Route path={routes.vibeCheck.root} element={<VibeCheck />} />
       <Route path={routes.publicCertificate.root} element={<PublicCertificate />} />
     </Routes>
   );

@@ -1,4 +1,4 @@
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import { EffectCoverflow, Navigation } from 'swiper/modules';
 import { ringsList } from './images';
 
@@ -7,6 +7,7 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/navigation';
 import './styles.scss';
+import { useRef } from 'react';
 
 interface SliderProps {
   currentCollection: string;
@@ -14,12 +15,15 @@ interface SliderProps {
 }
 
 export const Slider = ({ onSelect, currentCollection }: SliderProps) => {
+  const swiperRef = useRef<SwiperRef | null>(null);
+
   const handleRingSelect = (index: number) => () => {
     onSelect(index);
   };
 
   return (
     <Swiper
+      ref={swiperRef}
       className="ring-swiper"
       effect={'coverflow'}
       initialSlide={3}
@@ -34,10 +38,17 @@ export const Slider = ({ onSelect, currentCollection }: SliderProps) => {
       loop={true}
       navigation={true}
       modules={[EffectCoverflow, Navigation]}
-      // slideToClickedSlide={true}
+      slideToClickedSlide={true}
     >
       {ringsList[currentCollection].map(({ id, source }, index: number) => (
-        <SwiperSlide key={id} className="swiper-no-swiping" onClick={handleRingSelect(index)}>
+        <SwiperSlide
+          key={id}
+          className="swiper-no-swiping"
+          onClick={() => {
+            swiperRef.current?.swiper.slideToLoop(index);
+            handleRingSelect(index)();
+          }}
+        >
           <img src={source} />
         </SwiperSlide>
       ))}

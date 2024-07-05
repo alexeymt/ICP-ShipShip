@@ -43,4 +43,8 @@ export const routes = {
     root: '/payment',
     title: 'payment',
   },
+  vibeCheck: {
+    root: '/vibe-check',
+    title: 'vibe check',
+  },
 };

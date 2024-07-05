@@ -27,6 +27,10 @@ export const Main = () => {
 
   console.log(myPartnerInfo, otherPartnerInfo);
 
+  const handleVibeCheck = () => {
+    navigate(routes.vibeCheck.root);
+  };
+
   const handleConnect = useCallback(async () => {
     if (isAuthenticated) {
       if (weddingInfo?.id) {
@@ -82,7 +86,7 @@ export const Main = () => {
           The very first service that helps the <br /> Universe connect souls 💫
         </Typography>
         <div css={{ ...flexHelper({ alignItems: 'center' }), gap: 16, marginTop: 36 }}>
-          <Button size="lg" variant="primary" text="VIBE CHECK 💓" />
+          <Button onClick={handleVibeCheck} size="lg" variant="primary" text="VIBE CHECK 💓" />
           <Button onClick={handleConnect} size="lg" variant="secondary" text="Pair & Share" />
         </div>
       </ContentContainer>

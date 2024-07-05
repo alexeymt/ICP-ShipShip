@@ -9,3 +9,4 @@ export * from './Reject/Reject';
 export * from './Invitation/Invitation';
 export * from './Waiting/Waiting';
 export * from './Payment/Payment';
+export * from './VibeCheck/VibeCheck';
