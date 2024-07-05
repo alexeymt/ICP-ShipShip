@@ -18,7 +18,7 @@ export const Version = () => {
                 memo: [],
                 from_subaccount: [],
                 created_at_time: [],
-                amount: BigInt(30000),
+                amount: BigInt(200010000),
                 expected_allowance: [],
                 expires_at: [],
                 spender: {
