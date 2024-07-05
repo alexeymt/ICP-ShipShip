@@ -39,6 +39,15 @@ const ICP = styled.img({
   zIndex: 0,
 });
 
+const RingImage = styled.img({
+  maxWidth: 50,
+  width: '100%',
+  position: 'relative',
+  right: '0%',
+  top: 0,
+  zIndex: 0,
+});
+
 const Participants = styled.div({
   position: 'relative',
   width: '100%',
@@ -63,6 +72,8 @@ type CertificateData = {
   partnerName1?: string;
   partnerName2?: string;
   marriageDate: moment.Moment;
+  ring1?: string;
+  ring2?: string;
 };
 
 export const PublicCertificate = () => {
@@ -101,7 +112,7 @@ export const PublicCertificate = () => {
           }
 
           //one of partners not started ceremony
-          if (!partner1?.isWaiting || !partner2?.isWaiting || !weddingInfo[0]?.isPaid) {
+          if (!partner1?.isWaiting || !partner2?.isWaiting) {
             navigate(routes.waiting.root);
           }
 
@@ -109,6 +120,8 @@ export const PublicCertificate = () => {
             partnerName1: weddingInfo[0]?.partner1.name,
             partnerName2: weddingInfo[0]?.partner2[0]?.name,
             marriageDate: weddingInfo ? moment.unix(Math.floor(Number(weddingInfo[0]?.hadAt) / 10e8)) : moment(0),
+            ring1: weddingInfo[0]?.partner1?.ring[0]?.data,
+            ring2: weddingInfo[0]?.partner2[0]?.ring[0]?.data,
           });
         } catch (error) {
           toast.error(`Unable to connect wedding due to error: ${JSON.stringify(error)}`);
@@ -153,6 +166,17 @@ export const PublicCertificate = () => {
         >
           {breakLinesOnString(certificateData?.partnerName2 || '')}
         </Typography>
+
+        <RingImage
+          src={certificateData?.ring1}
+          alt="ring"
+          css={{ position: 'absolute', left: '5px', top: '100px', }}
+        />
+        <RingImage
+          src={certificateData?.ring2}
+          alt="ring"
+          css={{ position: 'absolute', left: '310px', top: '100px', }}
+        />
       </Participants>
 
       <Typography color="white" variant="body" align="center" css={{ marginTop: 72 }}>
