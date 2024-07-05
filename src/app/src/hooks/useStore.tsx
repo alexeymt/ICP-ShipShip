@@ -6,6 +6,11 @@ import { Principal } from '@dfinity/principal';
 
 import { canisterId as weddingCanisterId, createActor as createWeddingActor } from '../../../declarations/wedding';
 import { _SERVICE as _WEDDING_SERVICE } from '../../../declarations/wedding/wedding.did';
+import {
+  canisterId as ledgerCanisterId,
+  createActor as createLedgerActor
+} from "../../../declarations/icp_ledger_canister";
+import {_SERVICE as _LEDGER_SERVICE} from '../../../declarations/icp_ledger_canister/icp_ledger_canister.did';
 
 const IS_LOCAL = process.env.DFX_NETWORK === 'local';
 
@@ -32,6 +37,7 @@ const useStore_ = (options = defaultOptions) => {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [principal, setPrincipal] = useState<Principal | null>(null);
   const [weddingActor, setWeddingActor] = useState<ActorSubclass<_WEDDING_SERVICE> | null>(null);
+  const [ledgerActor, setLedgerActor] = useState<ActorSubclass<_LEDGER_SERVICE> | null>(null);
 
   const getWeddingInfoInterval = useRef<number>();
   const [weddingInfo, setWeddingInfo] = useState<Awaited<ReturnType<_WEDDING_SERVICE['getWeddingInfoOf']>>[0] | null>();
@@ -82,14 +88,19 @@ const useStore_ = (options = defaultOptions) => {
     const principal_ = identity_.getPrincipal();
     setPrincipal(principal_);
 
-    console.log('weddingCanisterId: ' + weddingCanisterId);
-
     const weddingActor_ = createWeddingActor(weddingCanisterId, {
       agentOptions: {
         identity: identity_,
       },
     });
     setWeddingActor(weddingActor_);
+
+    const ledgerActor_ = createLedgerActor(ledgerCanisterId, {
+      agentOptions: {
+        identity: identity_,
+      },
+    });
+    setLedgerActor(ledgerActor_);
 
     window.clearInterval(getWeddingInfoInterval.current);
     getWeddingInfoInterval.current = window.setInterval(async () => {
@@ -144,6 +155,8 @@ const useStore_ = (options = defaultOptions) => {
     identity: identity!,
     principal: principal!,
     weddingActor: weddingActor!,
+    ledgerActor: ledgerActor!,
+    weddingCanisterId,
     handleGetWeddingInfo,
     weddingInfo,
     myPartnerInfo,

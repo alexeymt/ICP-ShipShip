@@ -7,10 +7,10 @@ dfx start --clean --background
 
 yarn install
 
-dfx identity new shipship
-dfx identity use shipship
-BENEFICIARY=$(dfx identity get-principal)
-export BENEFICIARY
+dfx identity new minter
+dfx identity use minter
+MINT_ACC=$(dfx ledger account-id)
+export MINT_ACC
 
 dfx identity use default
 LEDGER_ACC=$(dfx ledger account-id)
@@ -26,6 +26,11 @@ dfx deploy icp_ledger_canister --argument "(variant {Init =record {minting_accou
 initial_values = vec { record {  \"${LEDGER_ACC}\";
 record { e8s=100_000_000_000 } } } ; archive_options = opt record {num_blocks_to_archive = 1000000; trigger_threshold = 1000000; \
   controller_id = principal  \"${ARCHIVE_CONTROLLER}\"; }; send_whitelist = vec {}}})" --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai
+
+dfx identity new shipship
+dfx identity use shipship
+BENEFICIARY=$(dfx identity get-principal)
+export BENEFICIARY
 
 dfx deploy internet_identity
 dfx generate

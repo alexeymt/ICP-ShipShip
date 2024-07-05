@@ -20,6 +20,8 @@ import {
 } from 'azle';
 import { v4 as uuidv4 } from 'uuid';
 import { zodiacTable, zodiacSigns, compatibilityTable } from './zodiacCompatibility';
+import Ok = Result.Ok;
+import Err = Result.Err;
 
 // eslint-disable-next-line no-extend-native, func-names
 BigInt.prototype.toJSON = function () {
@@ -403,34 +405,37 @@ let checkBalance = async (p: Principal) => {
 
 const beneficiary = "5yg43-67op4-r2q2a-uqxp6-5aaw5-tnriu-jwnv7-t2jyu-4mrdy-4ryan-lqe"
 
-async function transfer() {
+async function transfer(): Promise<Result<any, any>> {
   try {
     let arg = ic.candidEncode(`(
-  record {
-    to = record {
-      owner = principal "${beneficiary}";
-      subaccount = null;
-    };
-    fee = null;
-    spender_subaccount = null;
-    from = record {
-      owner = principal "${ic.caller().toString()}";
-      subaccount = null;
-    };
-    memo = null;
-    created_at_time = null;
-    amount = 20_000 : nat;
-  },
-)`)
-    let res = await ic.callRaw(Principal.fromText(ledgerCanisterId), 'icrc2_transfer_from', arg, BigInt(0));
-    let result = await ic.candidDecode(res)
-    let regexp = /\(variant { [\d_]* = [\d]* : nat }\)/
-    if (regexp.test(result)) {
-      console.log("OK!@")
-    }
+      record {
+        to = record {
+          owner = principal "${beneficiary}";
+          subaccount = null;
+        };
+        fee = null;
+        spender_subaccount = null;
+        from = record {
+          owner = principal "${ic.caller().toString()}";
+          subaccount = null;
+        };
+        memo = null;
+        created_at_time = null;
+        amount = 200_000_000 : nat;
+      },
+    )`)
+    let resultBytes = await ic.callRaw(Principal.fromText(ledgerCanisterId), 'icrc2_transfer_from', arg, BigInt(0));
+    let result = await ic.candidDecode(resultBytes)
     console.log('result: ' + result.toString())
+    let regexp = /\(variant { [\d_]* = \d* : nat }\)/
+    if (regexp.test(result)) {
+      return Ok(null)
+    } else {
+      return Err(`wrong result: ${result}`)
+    }
   } catch (e) {
     console.log(`can't transfer: ${e}`)
+    return Err(`something went wrong: ${e}`)
   }
 }
 
@@ -444,7 +449,7 @@ let testPayHandler = async () => {
   await checkBalance(caller)
   await checkBalance(b)
 
-  await transfer();
+  let result = await transfer();
 
   await checkBalance(caller)
   await checkBalance(b)
@@ -465,11 +470,6 @@ let payHandler = async () => {
   }
   let wedding = maybeWedding.Some!;
 
-  let partner = partners.get(wedding.partner1).Some!;
-  await mintPartnersRingAndUpdate(partner);
-  partner = partners.get(wedding.partner2.Some!).Some!;
-  await mintPartnersRingAndUpdate(partner);
-
   let caller = ic.caller()
   console.log(`caller: ${caller.toString()}`)
 
@@ -478,14 +478,25 @@ let payHandler = async () => {
   await checkBalance(caller)
   await checkBalance(b)
 
-  await transfer();
+  let result = await transfer();
 
-  await checkBalance(caller)
-  await checkBalance(b)
+  if (result.Ok) {
 
-  wedding.isPaid = true;
-  weddings.insert(wedding.id, wedding);
-  console.log(`wedding ${wedding.id.toString()} is paid`);
+    let partner = partners.get(wedding.partner1).Some!;
+    await mintPartnersRingAndUpdate(partner);
+    partner = partners.get(wedding.partner2.Some!).Some!;
+    await mintPartnersRingAndUpdate(partner);
+
+    await checkBalance(caller)
+    await checkBalance(b)
+
+    wedding.isPaid = true;
+    weddings.insert(wedding.id, wedding);
+    console.log(`wedding ${wedding.id.toString()} is paid`);
+  } else {
+    console.log(`wedding is not paid!`);
+  }
+
 };
 
 let mintPartnersRingAndUpdate = async (partner: typeof Partner) => {
@@ -493,8 +504,9 @@ let mintPartnersRingAndUpdate = async (partner: typeof Partner) => {
     throw `ring is not defined for partner: ${partner.id}`;
   }
   let ring = partner.ring.Some!;
-  let u8arr = Uint8Array.from(Buffer.from(partner.ring.Some!.data));
-  let rawArg = eval('`[{"data":[${u8arr}],"purpose":"Rendered","key_val_data":{}}]`');
+  //let u8arr = Uint8Array.from(Buffer.from(partner.ring.Some!.data));
+  let ringUrl = partner.ring.Some!.data
+  let rawArg = eval('`[{"data":[],"purpose":"Rendered","key_val_data":{"location":"${ringUrl}"}}]`');
   console.log('str: ' + rawArg);
   let result = await ic.call(nftCanister.mintDip721_text, {
     args: [weddingPrincipal, rawArg, []],
