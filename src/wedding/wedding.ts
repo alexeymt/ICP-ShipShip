@@ -4,7 +4,8 @@ import {
   Canister,
   ic,
   nat,
-  nat64, nat8,
+  nat64,
+  nat8,
   None,
   Opt,
   Principal,
@@ -96,13 +97,13 @@ let getWeddingInfoHandler = (principal) => {
     } else {
       partner2 = None;
     }
-    } else {
+  } else {
     partner1 = partners.get(wedding.partner1).Some!;
     partner2 = Some(partner);
   }
 
   return Some(
-    {...wedding, partner1, partner2}, // as any
+    { ...wedding, partner1, partner2 }, // as any
   );
 };
 
@@ -124,22 +125,21 @@ export const ledgerCanisterId = canister_ids['icp_ledger_canister'].local as str
 const weddingPrincipal = Principal.fromText(weddingCanisterId);
 
 const Account = Record({
-  owner: Principal/*,
-  subaccount: Opt(Vec(nat8))*/
-})
+  owner: Principal /*,
+  subaccount: Opt(Vec(nat8))*/,
+});
 
 const TransferArg = Record({
   to: Account,
-  amount: nat
-})
+  amount: nat,
+});
 
 const LegderCanister = Canister({
   icrc1_name: query([], text),
   icrc1_balance_of: query([Account], nat),
-})
+});
 
-
-const legderCanister = LegderCanister(Principal.fromText(ledgerCanisterId))
+const legderCanister = LegderCanister(Principal.fromText(ledgerCanisterId));
 
 const NftCanister = Canister({
   is_custodian: query([Principal], bool),
@@ -272,17 +272,17 @@ let getCertificateHandler = async (weddingId: text) => {
   }
   const wedding = maybeWedding.Some!;
   console.log('wedding: ' + JSON.stringify(wedding));
-  if (wedding.isPaid || wedding.isRejected) {
+  if (!wedding.isPaid || wedding.isRejected) {
     console.log('certificate has invalid status' + JSON.stringify(wedding));
     return None;
   }
 
-  let maybePartner = partners.get(wedding.partner1)
+  let maybePartner = partners.get(wedding.partner1);
   if ('None' in maybePartner) {
-    console.log(`partner1 not found`)
+    console.log(`partner1 not found`);
     return None;
   }
-  const partner1 = maybePartner.Some!
+  const partner1 = maybePartner.Some!;
 
   let partner2: Opt<typeof Partner> = None;
   if ('Some' in wedding.partner2) {
@@ -327,12 +327,11 @@ let setCertificateHandler = async (weddingId: text) => {
         return;
       }
       certificate = {
-        tokenId: obj["Ok"]["token_id"],
-        weddingId: weddingId
-      }
-      certificates.insert(weddingId, certificate)
-    }
-    else {
+        tokenId: obj['Ok']['token_id'],
+        weddingId: weddingId,
+      };
+      certificates.insert(weddingId, certificate);
+    } else {
       certificate = maybeCertificate.Some!;
     }
 
@@ -341,7 +340,6 @@ let setCertificateHandler = async (weddingId: text) => {
     console.log(error);
   }
 };
-
 
 const SetRingInput = Record({
   ringBase64: text,
@@ -392,18 +390,18 @@ let updatePartnerNameHandler = (partnerName: text) => {
 let checkBalance = async (p: Principal) => {
   let args = {
     owner: p,
-  }
+  };
   try {
     const result = await ic.call(legderCanister.icrc1_balance_of, {
-      args: [args]
+      args: [args],
     });
-    console.log(`balance of ${p.toString()} is ${JSON.stringify(result)}`)
+    console.log(`balance of ${p.toString()} is ${JSON.stringify(result)}`);
   } catch (e) {
-    console.log(`error ${e}`)
+    console.log(`error ${e}`);
   }
-}
+};
 
-const beneficiary = "5yg43-67op4-r2q2a-uqxp6-5aaw5-tnriu-jwnv7-t2jyu-4mrdy-4ryan-lqe"
+const beneficiary = '5yg43-67op4-r2q2a-uqxp6-5aaw5-tnriu-jwnv7-t2jyu-4mrdy-4ryan-lqe';
 
 async function transfer(): Promise<Result<any, any>> {
   try {
@@ -423,37 +421,49 @@ async function transfer(): Promise<Result<any, any>> {
         created_at_time = null;
         amount = 200_000_000 : nat;
       },
-    )`)
+    )`);
     let resultBytes = await ic.callRaw(Principal.fromText(ledgerCanisterId), 'icrc2_transfer_from', arg, BigInt(0));
-    let result = await ic.candidDecode(resultBytes)
-    console.log('result: ' + result.toString())
-    let regexp = /\(variant { [\d_]* = \d* : nat }\)/
+    let result = await ic.candidDecode(resultBytes);
+    console.log('result: ' + result.toString());
+    let regexp = /\(variant { [\d_]* = \d* : nat }\)/;
     if (regexp.test(result)) {
-      return Ok(null)
+      return Ok(null);
     } else {
-      return Err(`wrong result: ${result}`)
+      return Err(`wrong result: ${result}`);
     }
   } catch (e) {
-    console.log(`can't transfer: ${e}`)
-    return Err(`something went wrong: ${e}`)
+    console.log(`can't transfer: ${e}`);
+    return Err(`something went wrong: ${e}`);
   }
 }
 
 let testPayHandler = async () => {
-  console.log(`test pay handler`)
-  let caller = ic.caller()
-  console.log(`caller: ${caller.toString()}`)
+  console.log(`test pay handler`);
+  let caller = ic.caller();
+  console.log(`caller: ${caller.toString()}`);
 
-  let b= Principal.fromText(beneficiary)
+  let maybePartner = partners.get(caller);
+  if ('None' in maybePartner) {
+    console.log(`partner not found ${caller.toString()}`);
+    return;
+  }
+  let maybeWedding = weddings.get(maybePartner.Some!.wedding);
+  if ('None' in maybeWedding) {
+    console.log(`wedding not found ${caller.toString()}`);
+    return;
+  }
+  let wedding = maybeWedding.Some!;
 
-  await checkBalance(caller)
-  await checkBalance(b)
+  let b = Principal.fromText(beneficiary);
+
+  await checkBalance(caller);
+  await checkBalance(b);
 
   let result = await transfer();
-
-  await checkBalance(caller)
-  await checkBalance(b)
-}
+  wedding.isPaid = true;
+  weddings.insert(wedding.id, wedding);
+  console.log(`wedding ${wedding.id.toString()} is paid`);
+};
 
 let payHandler = async () => {
   let principal = ic.caller();
@@ -470,25 +480,24 @@ let payHandler = async () => {
   }
   let wedding = maybeWedding.Some!;
 
-  let caller = ic.caller()
-  console.log(`caller: ${caller.toString()}`)
+  let caller = ic.caller();
+  console.log(`caller: ${caller.toString()}`);
 
-  let b = Principal.fromText(beneficiary)
+  let b = Principal.fromText(beneficiary);
 
-  await checkBalance(caller)
-  await checkBalance(b)
+  await checkBalance(caller);
+  await checkBalance(b);
 
   let result = await transfer();
 
   if (result.Ok) {
+    // let partner = partners.get(wedding.partner1).Some!;
+    // await mintPartnersRingAndUpdate(partner);
+    // partner = partners.get(wedding.partner2.Some!).Some!;
+    // await mintPartnersRingAndUpdate(partner);
 
-    let partner = partners.get(wedding.partner1).Some!;
-    await mintPartnersRingAndUpdate(partner);
-    partner = partners.get(wedding.partner2.Some!).Some!;
-    await mintPartnersRingAndUpdate(partner);
-
-    await checkBalance(caller)
-    await checkBalance(b)
+    await checkBalance(caller);
+    await checkBalance(b);
 
     wedding.isPaid = true;
     weddings.insert(wedding.id, wedding);
@@ -496,7 +505,6 @@ let payHandler = async () => {
   } else {
     console.log(`wedding is not paid!`);
   }
-
 };
 
 let mintPartnersRingAndUpdate = async (partner: typeof Partner) => {
@@ -505,7 +513,7 @@ let mintPartnersRingAndUpdate = async (partner: typeof Partner) => {
   }
   let ring = partner.ring.Some!;
   //let u8arr = Uint8Array.from(Buffer.from(partner.ring.Some!.data));
-  let ringUrl = partner.ring.Some!.data
+  let ringUrl = partner.ring.Some!.data;
   let rawArg = eval('`[{"data":[],"purpose":"Rendered","key_val_data":{"location":"${ringUrl}"}}]`');
   console.log('str: ' + rawArg);
   let result = await ic.call(nftCanister.mintDip721_text, {
@@ -547,7 +555,7 @@ let checkCompatibilityHandler = (dateOfBirth1: text, dateOfBirth2: text) => {
       return calcLifePathNumber(sum.toString());
     }
 
-      return sum;
+    return sum;
   };
 
   const determineZodiacSign = (dateOfBirth: string) => {
@@ -555,15 +563,17 @@ let checkCompatibilityHandler = (dateOfBirth1: text, dateOfBirth2: text) => {
     const day = parseInt(dateOfBirth.slice(6, 8));
 
     for (let i = 0; i < zodiacSigns.length; i++) {
-        let sign = zodiacSigns[i];
-        let start = sign.start;
-        let end = sign.end;
+      let sign = zodiacSigns[i];
+      let start = sign.start;
+      let end = sign.end;
 
-        if ((month === start.month && day >= start.day) ||
-            (month === end.month && day <= end.day) ||
-            (month > start.month && month < end.month)) {
-            return sign.sign;
-        }
+      if (
+        (month === start.month && day >= start.day) ||
+        (month === end.month && day <= end.day) ||
+        (month > start.month && month < end.month)
+      ) {
+        return sign.sign;
+      }
     }
 
     return null;
@@ -580,9 +590,10 @@ let checkCompatibilityHandler = (dateOfBirth1: text, dateOfBirth2: text) => {
 
   const lifePathNumber1 = calcLifePathNumber(dateOfBirth1);
   const lifePathNumber2 = calcLifePathNumber(dateOfBirth2);
-  const lifePathNumberCompatibility = compatibilityTable[`${lifePathNumber1},${lifePathNumber2}`]
-    || compatibilityTable[`${lifePathNumber2},${lifePathNumber1}`]
-    || 'Neutral Compatibility';
+  const lifePathNumberCompatibility =
+    compatibilityTable[`${lifePathNumber1},${lifePathNumber2}`] ||
+    compatibilityTable[`${lifePathNumber2},${lifePathNumber1}`] ||
+    'Neutral Compatibility';
 
   return Some({
     compatibility: lifePathNumberCompatibility,
@@ -612,7 +623,6 @@ export default Canister({
   checkCompatibility: query([text, text], Opt(CompatibilityResult), checkCompatibilityHandler),
   testPay: update([], Void, testPayHandler),
 });
-
 
 globalThis.crypto = {
   // @ts-expect-error Uint8Array is compatible with ArrayBufferView

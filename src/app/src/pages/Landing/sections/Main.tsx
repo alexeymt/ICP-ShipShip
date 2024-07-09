@@ -25,8 +25,6 @@ export const Main = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo, weddingInfo } = useStore();
 
-  console.log(myPartnerInfo, otherPartnerInfo);
-
   const handleVibeCheck = () => {
     navigate(routes.vibeCheck.root);
   };
@@ -34,11 +32,14 @@ export const Main = () => {
   const handleConnect = useCallback(async () => {
     if (isAuthenticated) {
       if (weddingInfo?.id) {
+        if (!weddingInfo?.isPaid) {
+          navigate(routes.connect.root);
+          return;
+        }
         if (myPartnerInfo && otherPartnerInfo) {
           //with other partner
           // both agreed to marry
           if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {
-            console.log('here1');
             navigate(routes.certificate.root);
             return;
           }

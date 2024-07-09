@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -34,6 +34,12 @@ export const Form = () => {
       setMyPartnerName(otherPartnerInfo?.name);
     }
   }, []);
+
+  useEffect(() => {
+    if (weddingInfo?.isPaid) {
+      navigate(routes.waiting.root);
+    }
+  }, [weddingInfo?.isPaid]);
 
   const handleMyNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setMyName(event.target.value);
@@ -73,9 +79,18 @@ export const Form = () => {
     }
   }, [myName, weddingActor, weddingInfo?.id, myPartnerInfo, handleGetWeddingInfo]);
 
-  const handleNavigateToWaitingPage = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    navigate(routes.waiting.root);
+  const handlePayAndNavigateToWaitingPage = async () => {
+    try {
+      setIsActionsDisabled(true);
+      if (!weddingInfo?.isPaid) {
+        await weddingActor.testPay();
+        await handleGetWeddingInfo();
+      }
+      setIsActionsDisabled(false);
+    } catch (error) {
+      toast.error(`Payment was't successful`);
+      setIsActionsDisabled(false);
+    }
   };
 
   return (
@@ -109,7 +124,7 @@ export const Form = () => {
         text="Get Connected"
         sx={buttonStyles}
         disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
-        onClick={handleNavigateToWaitingPage}
+        onClick={handlePayAndNavigateToWaitingPage}
       />
     </CeremonyContainer>
   );

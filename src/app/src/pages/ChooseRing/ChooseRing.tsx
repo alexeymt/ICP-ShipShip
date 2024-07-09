@@ -9,6 +9,7 @@ import { Collections } from '../../components/Slider/constants';
 import { ringsList } from '../../components/Slider/images';
 import { Select } from '../../components/Select';
 import { toast } from 'react-toastify';
+import { PrivateRoute } from '../../auth';
 
 const Container = styled.div({
   height: 'calc(100vh - 220px)',
@@ -66,20 +67,26 @@ export const ChooseRing = () => {
   const navigate = useNavigate();
   const { weddingActor, weddingInfo } = useStore();
   const [selectedSlide, setSelectedSlide] = useState<number | null>(null);
+  const [selectedSlideCollection, setSelectedSlideCollection] = useState<string | null>(null);
   const [currentCollection, setCurrentCollection] = useState<string>('8bit');
   const [chosenRingSrc, setChosenRingSrc] = useState<string | null>(null);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
 
-  console.log(weddingInfo);
-
   useEffect(() => {
-    if (selectedSlide !== null) {
+    if (selectedSlide !== null && selectedSlideCollection !== null) {
       setChosenRingSrc(ringsList[currentCollection][selectedSlide].source);
     }
-  }, [selectedSlide]);
+  }, [selectedSlide, selectedSlideCollection]);
+
+  useEffect(() => {
+    if (!weddingInfo || !weddingInfo?.isPaid) {
+      navigate(routes.landing.root);
+    }
+  }, [weddingInfo?.isPaid]);
 
   const handleRingSelect = (imageIndex: number) => {
     setSelectedSlide(imageIndex);
+    setSelectedSlideCollection(currentCollection);
   };
 
   const handleCollectionChange = (option: string) => {
@@ -102,35 +109,37 @@ export const ChooseRing = () => {
   };
 
   return (
-    <Container>
-      <TopBlock>
-        <ChosenRingContainer>
-          <Typography align="center" variant="h3" color="white">
-            Your choice
-          </Typography>
-          {chosenRingSrc && <img src={chosenRingSrc} alt="Chosen ring" height={100} />}
-        </ChosenRingContainer>
-        <TextWrapper>
-          <StyledTypography align="center" variant="h2" color="white">
-            Invite your beloved, select your rings, and unite eternally with a blockchain wedding certificate.
-          </StyledTypography>
-        </TextWrapper>
-        <div>
-          <Select value={currentCollection} onChange={handleCollectionChange} options={Collections} />
-        </div>
-      </TopBlock>
+    <PrivateRoute>
+      <Container>
+        <TopBlock>
+          <ChosenRingContainer>
+            <Typography align="center" variant="h3" color="white">
+              Your choice
+            </Typography>
+            {chosenRingSrc && <img src={chosenRingSrc} alt="Chosen ring" height={100} />}
+          </ChosenRingContainer>
+          <TextWrapper>
+            <StyledTypography align="center" variant="h2" color="white">
+              Invite your beloved, select your rings, and unite eternally with a blockchain wedding certificate.
+            </StyledTypography>
+          </TextWrapper>
+          <div>
+            <Select value={currentCollection} onChange={handleCollectionChange} options={Collections} />
+          </div>
+        </TopBlock>
 
-      <Slider onSelect={handleRingSelect} currentCollection={currentCollection} />
-      <ButtonWrapper>
-        <Button
-          onClick={handleProceed}
-          size="lg"
-          type="submit"
-          variant="secondary"
-          text="Next"
-          disabled={!chosenRingSrc || isSubmitButtonDisabled}
-        />
-      </ButtonWrapper>
-    </Container>
+        <Slider onSelect={handleRingSelect} currentCollection={currentCollection} />
+        <ButtonWrapper>
+          <Button
+            onClick={handleProceed}
+            size="lg"
+            type="submit"
+            variant="secondary"
+            text="Next"
+            disabled={!chosenRingSrc || isSubmitButtonDisabled}
+          />
+        </ButtonWrapper>
+      </Container>
+    </PrivateRoute>
   );
 };

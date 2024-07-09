@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import styled from '@emotion/styled';
 import moment from 'moment';
 
-import { Icon, Typography,  } from '../../components';
+import { Icon, Typography } from '../../components';
 import { FontFamily } from '../../components/Typography/Typography.types';
 import { BlockContentContainer, COLOR_WH } from '../../styles';
 import { flexHelper } from '../../utils';
@@ -90,38 +90,38 @@ export const PublicCertificate = () => {
       if (weddingId) {
         try {
           const weddingInfo = await weddingActor.getCertificate(weddingId);
+          console.log(weddingInfo);
           if (!weddingInfo) {
             toast.error('Wedding not found');
             navigate(routes.landing.root);
+            return;
           }
           if (weddingInfo[0]?.isRejected) {
             toast.error('Wedding rejected');
             navigate(routes.landing.root);
+            return;
           }
 
           const partner1 = weddingInfo[0]?.partner1;
           const partner2 = weddingInfo[0]?.partner2[0];
 
-          if (!partner1?.isAgreed || !partner2?.isAgreed) {
-            navigate(routes.ceremony.root);
-          }
-
-          // ring not chosen and both partners started ceremony
-          if (!partner1?.ring && partner1?.isWaiting && partner2?.isWaiting) {
-            navigate(routes.choose.root);
-          }
-
-          //one of partners not started ceremony
-          if (!partner1?.isWaiting || !partner2?.isWaiting) {
-            navigate(routes.waiting.root);
+          if (
+            !partner1?.name ||
+            !partner2?.name ||
+            !weddingInfo[0]?.hadAt ||
+            !partner1.ring[0]?.data ||
+            !partner2.ring[0]?.data
+          ) {
+            navigate(routes.landing.root);
+            return;
           }
 
           setCertificateData({
-            partnerName1: weddingInfo[0]?.partner1.name,
-            partnerName2: weddingInfo[0]?.partner2[0]?.name,
+            partnerName1: partner1?.name,
+            partnerName2: partner2?.name,
             marriageDate: weddingInfo ? moment.unix(Math.floor(Number(weddingInfo[0]?.hadAt) / 10e8)) : moment(0),
-            ring1: weddingInfo[0]?.partner1?.ring[0]?.data,
-            ring2: weddingInfo[0]?.partner2[0]?.ring[0]?.data,
+            ring1: partner1?.ring[0]?.data,
+            ring2: partner2?.ring[0]?.data,
           });
         } catch (error) {
           toast.error(`Unable to connect wedding due to error: ${JSON.stringify(error)}`);
@@ -129,7 +129,7 @@ export const PublicCertificate = () => {
         }
       }
     }
-    process()
+    process();
   }, [weddingId]);
 
   return (
@@ -167,15 +167,11 @@ export const PublicCertificate = () => {
           {breakLinesOnString(certificateData?.partnerName2 || '')}
         </Typography>
 
-        <RingImage
-          src={certificateData?.ring1}
-          alt="ring"
-          css={{ position: 'absolute', left: '5px', top: '100px', }}
-        />
+        <RingImage src={certificateData?.ring1} alt="ring" css={{ position: 'absolute', left: '5px', top: '100px' }} />
         <RingImage
           src={certificateData?.ring2}
           alt="ring"
-          css={{ position: 'absolute', left: '310px', top: '100px', }}
+          css={{ position: 'absolute', left: '310px', top: '100px' }}
         />
       </Participants>
 
@@ -192,5 +188,5 @@ export const PublicCertificate = () => {
         <Icon type="icp-lable" width={85} height={69} color={COLOR_WH} />
       </CompaniesContainer>
     </CertificateCover>
-  )
-}
+  );
+};
