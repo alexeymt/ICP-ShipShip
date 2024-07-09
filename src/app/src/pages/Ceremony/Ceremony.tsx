@@ -11,34 +11,41 @@ import { PrivateRoute } from '../../auth';
 import styled from '@emotion/styled';
 import { LeftHeartAnimation, RightHeartAnimation } from '../../styles/animations';
 
+const StyledLeftHeart = styled(Typography)({
+  display: 'inline-block',
+  fontSize: '160px',
+  lineHeight: '160px',
+  zIndex: 10,
+
+  animation: `${LeftHeartAnimation} 4s forwards`,
+});
+
+const StyledRightHeart = styled(Typography)({
+  display: 'inline-block',
+  fontSize: '160px',
+  lineHeight: '160px',
+  zIndex: 10,
+
+  animation: `${RightHeartAnimation} 4s forwards`,
+});
+
 export const Ceremony = () => {
   const navigate = useNavigate();
-  const { myPartnerInfo, otherPartnerInfo, weddingActor } = useStore();
+  const { myPartnerInfo, otherPartnerInfo, weddingActor, weddingInfo, handleGetWeddingInfo } = useStore();
   const [isAgreeToMerryDisabled, setIsAgreeToMerryDisabled] = useState(false);
   const [isHeartsOpen, setIsHeartsOpen] = useState(false);
 
-  const StyledLeftHeart = styled(Typography)({
-    display: 'inline-block',
-    fontSize: '160px',
-    lineHeight: '160px',
-    zIndex: 10,
-
-    animation: `${LeftHeartAnimation} 4s`,
-  });
-
-  const StyledRightHeart = styled(Typography)({
-    display: 'inline-block',
-    fontSize: '160px',
-    lineHeight: '160px',
-    zIndex: 10,
-
-    animation: `${RightHeartAnimation} 4s`,
-  });
+  useEffect(() => {
+    if (!weddingInfo || !weddingInfo?.isPaid) {
+      navigate(routes.landing.root);
+    }
+  }, [weddingInfo?.isPaid]);
 
   const handleAgreeToMarry = useCallback(async () => {
     try {
       setIsAgreeToMerryDisabled(true);
       await weddingActor.agreeToMarry();
+      await handleGetWeddingInfo();
       toast.success('You agreed to marry');
     } catch (error) {
       console.error(error);
@@ -48,7 +55,7 @@ export const Ceremony = () => {
 
   const handleNavigateCertificate = useCallback(async () => {
     setIsHeartsOpen(true);
-    await sleep(3800);
+    await sleep(4500);
     setIsHeartsOpen(false);
     toast.success('You have been married');
     navigate(routes.certificate.root);

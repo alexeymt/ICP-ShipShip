@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import styled from '@emotion/styled';
 import moment from 'moment';
 
-import { Button, Icon, Typography,  } from '../../components';
+import { Button, Icon, Typography } from '../../components';
 import { FontFamily } from '../../components/Typography/Typography.types';
 import { useStore } from '../../hooks';
 import { BlockContentContainer, COLOR_WH } from '../../styles';
@@ -77,15 +77,21 @@ export const Certificate = () => {
   const partnerName2 = breakLinesOnString(otherPartnerInfo?.name || '');
   const shareDisabled: boolean = weddingInfo && weddingInfo.id ? false : true;
 
-  const handleConnect = useCallback(async () => {
-    if (!weddingInfo || !weddingInfo.id) {
+  useEffect(() => {
+    if (!weddingInfo || !weddingInfo?.isPaid) {
       navigate(routes.landing.root);
     }
-    else {
+  }, [weddingInfo?.isPaid]);
+
+  const handleShareLink = useCallback(async () => {
+    if (!weddingInfo || !weddingInfo.id) {
+      navigate(routes.landing.root);
+    } else {
+      console.log('handleShareLink');
       navigate({
         pathname: routes.publicCertificate.root,
         search: `?weddingId=${weddingInfo.id}`,
-      })
+      });
     }
   }, [weddingInfo]);
 
@@ -99,7 +105,8 @@ export const Certificate = () => {
           align="center"
           css={{ fontWeight: 600, fontSize: 26 }}
         >
-          Congrats {partnerName1} & {partnerName2}<br />
+          Congrats {partnerName1} & {partnerName2}
+          <br />
           on your digital "I do"! 💍✨
         </Typography>
       </BlockContentContainer>
@@ -122,7 +129,7 @@ export const Certificate = () => {
             variant="subtitle1"
             align="center"
             css={{ position: 'absolute', left: '5px', maxWidth: 130, wordWrap: 'break-word' }}
-            >
+          >
             {partnerName1}
           </Typography>
 
@@ -139,12 +146,12 @@ export const Certificate = () => {
           <RingImage
             src={myPartnerInfo?.ring[0]?.data}
             alt="ring"
-            css={{ position: 'absolute', left: '5px', top: '100px', }}
+            css={{ position: 'absolute', left: '5px', top: '100px' }}
           />
           <RingImage
             src={otherPartnerInfo?.ring[0]?.data}
             alt="ring"
-            css={{ position: 'absolute', left: '310px', top: '100px', }}
+            css={{ position: 'absolute', left: '310px', top: '100px' }}
           />
         </Participants>
 
@@ -162,17 +169,12 @@ export const Certificate = () => {
         </CompaniesContainer>
       </CertificateCover>
       <BlockContentContainer css={{ maxWidth: 654, marginTop: 30 }}>
-        <Typography
-          variant="h3"
-          color="white"
-          family={FontFamily.PPMori}
-          align="center"
-          css={{ fontWeight: 200 }}
-        >
-          We're thrilled to celebrate your virtual union. Here's to endless love, laughter, and adventures! Cheers to the happy couple! 🎉💕
+        <Typography variant="h3" color="white" family={FontFamily.PPMori} align="center" css={{ fontWeight: 200 }}>
+          We're thrilled to celebrate your virtual union. Here's to endless love, laughter, and adventures! Cheers to
+          the happy couple! 🎉💕
         </Typography>
         <div css={{ ...flexHelper({ justifyContent: 'center' }), gap: 16, marginTop: 10 }}>
-          <Button onClick={handleConnect} size="lg" variant="primary" text="Share" disabled={shareDisabled} />
+          <Button onClick={handleShareLink} size="lg" variant="primary" text="Share" disabled={shareDisabled} />
         </div>
       </BlockContentContainer>
     </PrivateRoute>

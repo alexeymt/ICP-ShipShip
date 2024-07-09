@@ -18,8 +18,6 @@ export const Waiting = () => {
   const { myPartnerInfo, otherPartnerInfo, weddingActor, weddingInfo, handleGetWeddingInfo } = useStore();
   const [isStartCeremonyDisabled, setIsStartCeremonyDisabled] = useState(false);
 
-  console.log(weddingInfo, myPartnerInfo, otherPartnerInfo);
-
   const handleStartCeremony = useCallback(async () => {
     try {
       setIsStartCeremonyDisabled(true);
@@ -49,6 +47,12 @@ export const Waiting = () => {
     }
   }, [weddingInfo?.isRejected]);
 
+  useEffect(() => {
+    if (!myPartnerInfo) {
+      navigate(routes.landing.root);
+    }
+  }, [myPartnerInfo, otherPartnerInfo]);
+
   return (
     <PrivateRoute>
       <CeremonyContainer
@@ -73,7 +77,7 @@ export const Waiting = () => {
         />
         <ButtonWrapper>
           <Button
-            disabled={myPartnerInfo?.isWaiting || isStartCeremonyDisabled}
+            disabled={myPartnerInfo?.isWaiting || isStartCeremonyDisabled || !weddingInfo?.isPaid}
             onClick={handleStartCeremony}
             text="Start ceremony"
             variant="secondary"

@@ -7,7 +7,7 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/navigation';
 import './styles.scss';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SliderProps {
   currentCollection: string;
@@ -15,9 +15,15 @@ interface SliderProps {
 }
 
 export const Slider = ({ onSelect, currentCollection }: SliderProps) => {
+  const [collection, setCollection] = useState([...ringsList[currentCollection]]);
   const swiperRef = useRef<SwiperRef | null>(null);
 
-  const handleRingSelect = (index: number) => () => {
+  useEffect(() => {
+    setCollection([...ringsList[currentCollection]]);
+  }, [currentCollection]);
+
+  const handleRingSelect = (index: number) => {
+    console.log(index);
     onSelect(index);
   };
 
@@ -40,13 +46,13 @@ export const Slider = ({ onSelect, currentCollection }: SliderProps) => {
       modules={[EffectCoverflow, Navigation]}
       slideToClickedSlide={true}
     >
-      {ringsList[currentCollection].map(({ id, source }, index: number) => (
+      {collection.map(({ id, source }, index: number) => (
         <SwiperSlide
           key={id}
           className="swiper-no-swiping"
           onClick={() => {
             swiperRef.current?.swiper.slideToLoop(index);
-            handleRingSelect(index)();
+            handleRingSelect(index);
           }}
         >
           <img src={source} />
