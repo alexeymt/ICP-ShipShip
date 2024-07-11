@@ -13,14 +13,30 @@ export type StoryProps = {
 export const StoryContainer = styled.div({
   ...flexHelper({ alignItems: 'center', flexDirection: 'column' }),
   gap: 7,
+  cursor: 'pointer',
+});
+
+const StyledButton = styled.button({
+  background: 'linear-gradient(white, white) padding-box, linear-gradient(255deg, #E9BB47 0%, #E871EB 100%) border-box',
+  borderRadius: '50%',
+  border: '3px solid transparent',
+  cursor: 'pointer',
+  fontSize: 0,
+});
+
+const StyledImage = styled.img({
+  width: '66px',
+  height: '66px',
+  borderRadius: '50%',
+  cursor: 'pointer',
 });
 
 export const Story: FC<StoryProps> = ({ img, text, onStoryOpen }) => {
   return (
     <StoryContainer>
-      <button type="button" onClick={onStoryOpen}>
-        <img width={72} height={72} src={img} alt="story image" />
-      </button>
+      <StyledButton type="button" onClick={onStoryOpen}>
+        <StyledImage width={66} height={66} src={img} alt="story image" />
+      </StyledButton>
       <Typography variant="label" family="Poppins" color="white">
         {text}
       </Typography>

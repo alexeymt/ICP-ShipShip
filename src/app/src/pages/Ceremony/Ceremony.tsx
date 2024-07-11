@@ -79,27 +79,28 @@ export const Ceremony = () => {
       >
         {isHeartsOpen && (
           <>
-            <div style={{ position: 'absolute', top: 100, left: 0 }}>
+            <div style={{ position: 'absolute', top: 70, left: 0 }}>
               <StyledLeftHeart>❤️‍🔥</StyledLeftHeart>
             </div>
-            <div style={{ position: 'absolute', top: 100, right: 0 }}>
+            <div style={{ position: 'absolute', top: 70, right: 0 }}>
               <StyledRightHeart>❤️‍🔥</StyledRightHeart>
             </div>
           </>
         )}
 
         <GradientTypography variant="h1" css={{ marginBottom: 40 }}>
-          Exchanging Vows Ceremony
+          Exchanging Vows
         </GradientTypography>
         <WeddingStepper
           partner1={{
-            name: otherPartnerInfo?.name ?? '?',
-            isAccepted: !!otherPartnerInfo?.isAgreed,
-          }}
-          partner2={{
             name: myPartnerInfo?.name ?? '?',
             isAccepted: !!myPartnerInfo?.isAgreed,
           }}
+          partner2={{
+            name: otherPartnerInfo?.name ?? '?',
+            isAccepted: !!otherPartnerInfo?.isAgreed,
+          }}
+          isCeremony={true}
         />
 
         <Typography align="center" variant="body" css={{ fontSize: 18, margin: '39px 0' }}>

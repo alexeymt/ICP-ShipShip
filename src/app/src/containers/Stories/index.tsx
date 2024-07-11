@@ -16,7 +16,7 @@ const StoryContainer = styled.div({
 
 export const stories = [
   {
-    text: 'Manifesto',
+    text: 'About us',
     img: story1,
   },
   {

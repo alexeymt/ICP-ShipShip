@@ -5,9 +5,9 @@ import { shortenPhrase } from '../../utils';
 
 interface ShareLinkProps {
   title: string;
-  description: string;
   link: string;
   disabled: boolean;
+  description?: string;
 }
 
 export const ShareLink = ({ title, description, link, disabled = true }: ShareLinkProps) => {
@@ -17,9 +17,16 @@ export const ShareLink = ({ title, description, link, disabled = true }: ShareLi
         {title}
       </Typography>
 
-      <Typography variant="label" family={FontFamily.Poppins} color="white" css={{ fontWeight: 400, marginBottom: 8 }}>
-        {description}
-      </Typography>
+      {description && (
+        <Typography
+          variant="label"
+          family={FontFamily.Poppins}
+          color="white"
+          css={{ fontWeight: 400, marginBottom: 8 }}
+        >
+          {description}
+        </Typography>
+      )}
 
       <Copyable
         copyText={`${window.location.host}${link}`}

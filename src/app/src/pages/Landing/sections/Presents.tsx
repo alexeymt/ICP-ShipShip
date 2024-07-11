@@ -50,7 +50,7 @@ export const Presents = () => {
   return (
     <PresentsContainer>
       <Typography align="center" color="white" variant="subtitle1">
-        Connect and get free presents
+        Pair now and enjoy our specials
       </Typography>
       <CardsContainer>
         {presentsCardsMock.map(({ imgSrc, description, title }) => (

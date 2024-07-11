@@ -9,11 +9,19 @@ import { CeremonyContainer, GradientTypography } from '../../styles';
 
 import { ShareLink } from './ShareLink';
 
-const buttonStyles = {
+const getLinkButtonStyles = {
   display: 'flex',
-  maxWidth: 220,
+  maxWidth: 150,
   padding: '16px 30px',
-  margin: '50px auto 30px auto',
+  margin: '40px auto 30px auto',
+  width: '100%',
+};
+
+const responseButtonStyles = {
+  display: 'flex',
+  maxWidth: 280,
+  padding: '16px 30px',
+  margin: '40px auto 30px auto',
   width: '100%',
 };
 
@@ -23,6 +31,8 @@ export const Form = () => {
   const [myName, setMyName] = useState('');
   const [myPartnerName, setMyPartnerName] = useState('');
   const [isActionsDisabled, setIsActionsDisabled] = useState(false);
+  const [isGetLinkClicked, setIsGetLinkClicked] = useState(false);
+  const [showLinkBlock, setShowLinkBlock] = useState(false);
 
   console.log(weddingInfo);
 
@@ -42,10 +52,14 @@ export const Form = () => {
   }, [weddingInfo?.isPaid]);
 
   const handleMyNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setIsGetLinkClicked(false);
+    setShowLinkBlock(false);
     setMyName(event.target.value);
   }, []);
 
   const handleMyPartnerNameChange = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    setIsGetLinkClicked(false);
+    setShowLinkBlock(false);
     setMyPartnerName(event.target.value);
   }, []);
 
@@ -93,9 +107,14 @@ export const Form = () => {
     }
   };
 
+  const handleGetLinkButtonClick = () => {
+    setShowLinkBlock(true);
+    setIsGetLinkClicked(true);
+  };
+
   return (
     <CeremonyContainer>
-      <GradientTypography variant="h1">Connect</GradientTypography>
+      <GradientTypography variant="h1">Invite to pair</GradientTypography>
       <Input
         title="Your name"
         onChange={handleMyNameChange}
@@ -112,20 +131,33 @@ export const Form = () => {
         sx={{ marginTop: 20 }}
         value={myPartnerName}
       />
-      <ShareLink
-        title="Invite your partner to connect"
-        description="Copy link and share it with your sweetheart"
-        link={`/invitation?acceptorName=${myPartnerName}&proposerName=${myName}&weddingId=${weddingInfo?.id}`}
-        disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
-      />
       <Button
-        type="submit"
+        type="button"
         variant="secondary"
-        text="Get Connected"
-        sx={buttonStyles}
-        disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
-        onClick={handlePayAndNavigateToWaitingPage}
+        text="Get Link"
+        sx={getLinkButtonStyles}
+        disabled={
+          isGetLinkClicked || isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id
+        }
+        onClick={handleGetLinkButtonClick}
       />
+      {showLinkBlock && (
+        <>
+          <ShareLink
+            title="Invitation created. Copy link and share"
+            link={`/invitation?acceptorName=${myPartnerName}&proposerName=${myName}&weddingId=${weddingInfo?.id}`}
+            disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            text="Wait for response"
+            sx={responseButtonStyles}
+            disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
+            onClick={handlePayAndNavigateToWaitingPage}
+          />
+        </>
+      )}
     </CeremonyContainer>
   );
 };

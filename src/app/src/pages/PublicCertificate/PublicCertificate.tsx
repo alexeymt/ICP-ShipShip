@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useStore } from '../../hooks';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import styled from '@emotion/styled';
 import moment from 'moment';
+import { toPng } from 'html-to-image';
 
-import { Icon, Typography } from '../../components';
+import { Button, Icon, Typography } from '../../components';
 import { FontFamily } from '../../components/Typography/Typography.types';
 import { BlockContentContainer, COLOR_WH } from '../../styles';
 import { flexHelper } from '../../utils';
@@ -17,7 +18,14 @@ import icp from './icp.png';
 
 const breakLinesOnString = (str: string) => str.replace(/\s+/g, '\n');
 
-const CertificateCover = styled(BlockContentContainer)({
+const CertificateCoverWrapper = styled.div({
+  display: 'flex',
+  justifyContent: 'center',
+  marginTop: 20,
+  padding: '35px 30px 37px 30px',
+});
+
+const CertificateCover = styled.div({
   ...flexHelper({ alignItems: 'center', flexDirection: 'column' }),
   maxWidth: 431,
   borderRadius: 35,
@@ -25,9 +33,8 @@ const CertificateCover = styled(BlockContentContainer)({
   height: 752,
   background: `url(${certificateCover})`,
   backgroundSize: 'contain',
-  marginTop: 20,
-  padding: '35px 30px 37px 30px',
   backgroundRepeat: 'no-repeat',
+  padding: '20px',
 });
 
 const ICP = styled.img({
@@ -42,9 +49,6 @@ const ICP = styled.img({
 const RingImage = styled.img({
   maxWidth: 50,
   width: '100%',
-  position: 'relative',
-  right: '0%',
-  top: 0,
   zIndex: 0,
 });
 
@@ -85,12 +89,32 @@ export const PublicCertificate = () => {
 
   const weddingId = searchParams.get('weddingId');
 
+  const downloadDisabled: boolean = weddingId ? false : true;
+
+  const ref = useRef<HTMLDivElement>(null);
+
+  const onButtonClick = useCallback(() => {
+    if (ref.current === null) {
+      return;
+    }
+
+    toPng(ref.current, { cacheBust: true, width: 431, height: 750, backgroundColor: 'transparent' })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = 'certificate.png';
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        toast.error(`Error while downloading certificate ${err}`);
+      });
+  }, [ref]);
+
   useEffect(() => {
     async function process() {
       if (weddingId) {
         try {
           const weddingInfo = await weddingActor.getCertificate(weddingId);
-          console.log(weddingInfo);
           if (!weddingInfo) {
             toast.error('Wedding not found');
             navigate(routes.landing.root);
@@ -133,60 +157,80 @@ export const PublicCertificate = () => {
   }, [weddingId]);
 
   return (
-    <CertificateCover>
-      <Typography
-        variant="h1"
-        color="white"
-        family={FontFamily.PPMori}
-        align="center"
-        css={{ fontWeight: 400, textTransform: 'capitalize', marginBottom: 16 }}
-      >
-        digital connection certificate
-      </Typography>
+    <BlockContentContainer>
+      <CertificateCoverWrapper>
+        <CertificateCover ref={ref}>
+          <Typography
+            variant="h1"
+            color="white"
+            family={FontFamily.PPMori}
+            align="center"
+            css={{ fontWeight: 400, textTransform: 'capitalize', marginBottom: 16 }}
+          >
+            digital connection certificate
+          </Typography>
 
-      <Participants>
-        <ICP src={icp} alt="icp" />
+          <Participants>
+            <ICP src={icp} alt="icp" />
 
-        <Typography
-          color="white"
-          family={FontFamily.PPMori}
-          variant="subtitle1"
-          align="center"
-          css={{ position: 'absolute', left: '5px', maxWidth: 130, wordWrap: 'break-word' }}
-        >
-          {breakLinesOnString(certificateData?.partnerName1 || '')}
-        </Typography>
+            <Typography
+              color="white"
+              family={FontFamily.PPMori}
+              variant="subtitle1"
+              align="center"
+              css={{ position: 'absolute', left: '5px', maxWidth: 130, wordWrap: 'break-word' }}
+            >
+              {breakLinesOnString(certificateData?.partnerName1 || '')}
+            </Typography>
 
-        <Typography
-          color="white"
-          family={FontFamily.PPMori}
-          variant="subtitle1"
-          align="center"
-          css={{ position: 'absolute', right: '-5px', maxWidth: 130, wordWrap: 'break-word' }}
-        >
-          {breakLinesOnString(certificateData?.partnerName2 || '')}
-        </Typography>
+            <Typography
+              color="white"
+              family={FontFamily.PPMori}
+              variant="subtitle1"
+              align="center"
+              css={{ position: 'absolute', right: '-5px', maxWidth: 130, wordWrap: 'break-word' }}
+            >
+              {breakLinesOnString(certificateData?.partnerName2 || '')}
+            </Typography>
 
-        <RingImage src={certificateData?.ring1} alt="ring" css={{ position: 'absolute', left: '5px', top: '100px' }} />
-        <RingImage
-          src={certificateData?.ring2}
-          alt="ring"
-          css={{ position: 'absolute', left: '310px', top: '100px' }}
-        />
-      </Participants>
+            <RingImage
+              src={certificateData?.ring1}
+              alt="ring"
+              css={{ position: 'absolute', left: '15px', top: '150px' }}
+            />
+            <RingImage
+              src={certificateData?.ring2}
+              alt="ring"
+              css={{ position: 'absolute', right: '15px', top: '150px' }}
+            />
+          </Participants>
 
-      <Typography color="white" variant="body" align="center" css={{ marginTop: 72 }}>
-        Bonded <br /> Beyond Time & Distance
-      </Typography>
+          <Typography color="white" variant="body" align="center" css={{ marginTop: 72 }}>
+            Bonded <br /> Beyond Time & Distance
+          </Typography>
 
-      <Typography color="white" family={FontFamily.PPMori} variant="subtitle1" align="center" css={{ marginTop: 26 }}>
-        {certificateData?.marriageDate.format('DD.MM.YYYY')}
-      </Typography>
+          <Typography
+            color="white"
+            family={FontFamily.PPMori}
+            variant="subtitle1"
+            align="center"
+            css={{ marginTop: 26 }}
+          >
+            {certificateData?.marriageDate.format('DD.MM.YYYY')}
+          </Typography>
 
-      <CompaniesContainer>
-        <Icon type="logo" width={62} height={66} color={COLOR_WH} />
-        <Icon type="icp-lable" width={85} height={69} color={COLOR_WH} />
-      </CompaniesContainer>
-    </CertificateCover>
+          <CompaniesContainer>
+            <Icon type="logo" width={62} height={66} color={COLOR_WH} />
+            <Icon type="icp-lable" width={85} height={69} color={COLOR_WH} />
+          </CompaniesContainer>
+        </CertificateCover>
+      </CertificateCoverWrapper>
+
+      <BlockContentContainer css={{ maxWidth: 654, marginTop: 0 }}>
+        <div css={{ ...flexHelper({ justifyContent: 'center' }), gap: 16, marginTop: 0 }}>
+          <Button onClick={onButtonClick} size="lg" variant="primary" text="Download" disabled={downloadDisabled} />
+        </div>
+      </BlockContentContainer>
+    </BlockContentContainer>
   );
 };
