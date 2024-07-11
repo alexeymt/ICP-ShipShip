@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { heart } from '../../assets/images';
 import { flexHelper } from '../../utils';
 import checkIcon from '../Icons/components/check.svg';
 import { FontFamily, Typography } from '../Typography';
@@ -16,14 +15,12 @@ const StyledHeart = styled(Typography)({
 
 const NameWrapper = styled.div({
   display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   position: 'relative',
-  backgroundImage: `url(${heart})`,
   width: '150px',
   height: '150px',
-  backgroundSize: 'contain',
-  backgroundRepeat: 'no-repeat',
 });
 
 const StyledName = styled(Typography)({
@@ -31,14 +28,12 @@ const StyledName = styled(Typography)({
   wordWrap: 'break-word',
   width: '150px',
   fontWeight: 'bold',
+  minHeight: '90px',
 });
 
 export const CheckLabel = () => (
   <div
     css={{
-      position: 'absolute',
-      top: 15,
-      left: '-3px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -62,11 +57,12 @@ export type WeddingStepperProps = {
     name: string;
     isAccepted: boolean;
   };
+  isCeremony?: boolean;
 };
 
 const breakLinesOnString = (str: string) => str.replace(/\s+/g, '\n');
 
-export const WeddingStepper = ({ partner1, partner2 }: WeddingStepperProps) => {
+export const WeddingStepper = ({ partner1, partner2, isCeremony = false }: WeddingStepperProps) => {
   return (
     <div
       css={{
@@ -75,15 +71,34 @@ export const WeddingStepper = ({ partner1, partner2 }: WeddingStepperProps) => {
       }}
     >
       <NameWrapper>
-        <StyledName color="black" family={FontFamily.PPMori} variant="subtitle1" align="center">
+        {isCeremony && <div style={{ minHeight: '40px' }}>{partner1.isAccepted && <CheckLabel />}</div>}
+        <StyledName
+          color="black"
+          family={FontFamily.PPMori}
+          variant="subtitle1"
+          align="center"
+          css={{
+            maxWidth: 150,
+            wordWrap: 'break-word',
+            width: '150px',
+            fontWeight: 'bold',
+          }}
+        >
           {breakLinesOnString(partner1.name || '')}
         </StyledName>
-        {partner1.isAccepted && <CheckLabel />}
+        {!isCeremony && (
+          <div style={{ minHeight: '30px' }}>
+            {partner1.isAccepted && <CheckLabel />}
+            {!partner1.isAccepted && <Typography>Waiting</Typography>}
+          </div>
+        )}
+        {isCeremony && <div style={{ minHeight: '32px' }}></div>}
       </NameWrapper>
 
-      <StyledHeart>💖</StyledHeart>
+      <StyledHeart>💞</StyledHeart>
 
       <NameWrapper>
+        {isCeremony && <div style={{ minHeight: '40px' }}>{partner2.isAccepted && <CheckLabel />}</div>}
         <StyledName
           color="black"
           family={FontFamily.PPMori}
@@ -98,7 +113,17 @@ export const WeddingStepper = ({ partner1, partner2 }: WeddingStepperProps) => {
         >
           {breakLinesOnString(partner2.name || '')}
         </StyledName>
-        {partner2.isAccepted && <CheckLabel />}
+        {!isCeremony && (
+          <div style={{ minHeight: '30px' }}>
+            {partner2.isAccepted && <CheckLabel />}
+            {!partner2.isAccepted && <Typography>Waiting</Typography>}
+          </div>
+        )}
+        {isCeremony && (
+          <div style={{ minHeight: '32px' }}>
+            {!partner1.isAccepted && <Typography align="center">"Would you marry me?"</Typography>}
+          </div>
+        )}
       </NameWrapper>
     </div>
   );

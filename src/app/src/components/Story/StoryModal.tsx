@@ -21,6 +21,10 @@ const ModalContent = styled.div({
   aspectRatio: 0.55,
 });
 
+const StyledImage = styled.img({
+  borderRadius: '20px',
+});
+
 interface StoryModalProps extends ModalProps {
   image: string;
 }
@@ -29,12 +33,12 @@ export const StoryModal = ({ image, visible, onClose }: StoryModalProps) => {
   return (
     <Modal visible={visible} onClose={onClose}>
       <ModalContent>
-        <img src={image} alt="Story" width="100%" />
+        <StyledImage src={image} alt="Story" width="100%" style={{}} />
         <button aria-label="close button" type="button" onClick={onClose}>
           <Icon type="close" width={56} height={56} sx={{ position: 'absolute', right: 10, top: 10 }} />
         </button>
 
-        <BottomContent>
+        {/* <BottomContent>
           <img alt="speaker" src={speaker} width={58} height={56} />
           <Typography
             variant="label"
@@ -44,7 +48,7 @@ export const StoryModal = ({ image, visible, onClose }: StoryModalProps) => {
           >
             Manifesto
           </Typography>
-        </BottomContent>
+        </BottomContent> */}
       </ModalContent>
     </Modal>
   );

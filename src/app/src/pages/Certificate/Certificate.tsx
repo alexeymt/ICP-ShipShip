@@ -41,10 +41,8 @@ const ICP = styled.img({
 const RingImage = styled.img({
   maxWidth: 50,
   width: '100%',
-  position: 'relative',
-  right: '0%',
-  top: 0,
   zIndex: 0,
+  // marginTop: '30px',
 });
 
 const Participants = styled.div({
@@ -146,12 +144,12 @@ export const Certificate = () => {
           <RingImage
             src={myPartnerInfo?.ring[0]?.data}
             alt="ring"
-            css={{ position: 'absolute', left: '5px', top: '100px' }}
+            css={{ position: 'absolute', left: '15px', top: '150px' }}
           />
           <RingImage
             src={otherPartnerInfo?.ring[0]?.data}
             alt="ring"
-            css={{ position: 'absolute', left: '310px', top: '100px' }}
+            css={{ position: 'absolute', right: '15px', top: '150px' }}
           />
         </Participants>
 

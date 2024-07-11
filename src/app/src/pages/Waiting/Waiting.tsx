@@ -63,16 +63,16 @@ export const Waiting = () => {
         }}
       >
         <GradientTypography variant="h1" css={{ marginBottom: 40 }}>
-          Waiting for your partner
+          Ceremony
         </GradientTypography>
         <WeddingStepper
           partner1={{
-            name: otherPartnerInfo?.name ?? '?',
-            isAccepted: !!otherPartnerInfo?.isWaiting,
-          }}
-          partner2={{
             name: myPartnerInfo?.name ?? '?',
             isAccepted: !!myPartnerInfo?.isWaiting,
+          }}
+          partner2={{
+            name: otherPartnerInfo?.name ?? '?',
+            isAccepted: !!otherPartnerInfo?.isWaiting,
           }}
         />
         <ButtonWrapper>

@@ -68,7 +68,7 @@ export const ChooseRing = () => {
   const { weddingActor, weddingInfo } = useStore();
   const [selectedSlide, setSelectedSlide] = useState<number | null>(null);
   const [selectedSlideCollection, setSelectedSlideCollection] = useState<string | null>(null);
-  const [currentCollection, setCurrentCollection] = useState<string>('8bit');
+  const [currentCollection, setCurrentCollection] = useState<string>('16-bit');
   const [chosenRingSrc, setChosenRingSrc] = useState<string | null>(null);
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
 
@@ -112,20 +112,20 @@ export const ChooseRing = () => {
     <PrivateRoute>
       <Container>
         <TopBlock>
+          <div>
+            <Select value={currentCollection} onChange={handleCollectionChange} options={Collections} />
+          </div>
+          <TextWrapper>
+            <StyledTypography align="center" variant="h2" color="black">
+              Choose your ring
+            </StyledTypography>
+          </TextWrapper>
           <ChosenRingContainer>
             <Typography align="center" variant="h3" color="white">
               Your choice
             </Typography>
             {chosenRingSrc && <img src={chosenRingSrc} alt="Chosen ring" height={100} />}
           </ChosenRingContainer>
-          <TextWrapper>
-            <StyledTypography align="center" variant="h2" color="white">
-              Invite your beloved, select your rings, and unite eternally with a blockchain wedding certificate.
-            </StyledTypography>
-          </TextWrapper>
-          <div>
-            <Select value={currentCollection} onChange={handleCollectionChange} options={Collections} />
-          </div>
         </TopBlock>
 
         <Slider onSelect={handleRingSelect} currentCollection={currentCollection} />
