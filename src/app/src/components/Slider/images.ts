@@ -78,18 +78,12 @@ import img73 from './rings/superpower/images/10.png';
 import img74 from './rings/superpower/images/11.png';
 import img75 from './rings/superpower/images/12.png';
 
-import img76 from './rings/techno/images/1.png';
 import img77 from './rings/techno/images/2.png';
 import img78 from './rings/techno/images/3.png';
-import img79 from './rings/techno/images/4.png';
-import img80 from './rings/techno/images/5.png';
 import img81 from './rings/techno/images/6.png';
 import img82 from './rings/techno/images/7.png';
-import img83 from './rings/techno/images/8.png';
-import img84 from './rings/techno/images/9.png';
 import img85 from './rings/techno/images/10.png';
 import img86 from './rings/techno/images/11.png';
-import img87 from './rings/techno/images/12.png';
 
 import img88 from './rings/metalico/images/1.png';
 import img89 from './rings/metalico/images/2.png';
@@ -142,7 +136,6 @@ import img133 from './rings/2046/images/10.png';
 import img134 from './rings/2046/images/11.png';
 import img135 from './rings/2046/images/12.png';
 
-import img136 from './rings/stars/images/1.png';
 import img137 from './rings/stars/images/2.png';
 import img138 from './rings/stars/images/3.png';
 import img139 from './rings/stars/images/4.png';
@@ -243,18 +236,12 @@ export const ringsList = {
     { id: 12, source: img75 },
   ],
   techno: [
-    { id: 1, source: img76 },
-    { id: 2, source: img77 },
-    { id: 3, source: img78 },
-    { id: 4, source: img79 },
-    { id: 5, source: img80 },
-    { id: 6, source: img81 },
-    { id: 7, source: img82 },
-    { id: 8, source: img83 },
-    { id: 9, source: img84 },
-    { id: 10, source: img85 },
-    { id: 11, source: img86 },
-    { id: 12, source: img87 },
+    { id: 1, source: img77 },
+    { id: 2, source: img78 },
+    { id: 3, source: img81 },
+    { id: 4, source: img82 },
+    { id: 5, source: img85 },
+    { id: 6, source: img86 },
   ],
   metalico: [
     { id: 1, source: img88 },
@@ -311,18 +298,17 @@ export const ringsList = {
     { id: 12, source: img135 },
   ],
   stars: [
-    { id: 1, source: img136 },
-    { id: 2, source: img137 },
-    { id: 3, source: img138 },
-    { id: 4, source: img139 },
-    { id: 5, source: img140 },
-    { id: 6, source: img141 },
-    { id: 7, source: img142 },
-    { id: 8, source: img143 },
-    { id: 9, source: img144 },
-    { id: 10, source: img145 },
-    { id: 11, source: img146 },
-    { id: 12, source: img147 },
-    { id: 13, source: img148 },
+    { id: 1, source: img137 },
+    { id: 2, source: img138 },
+    { id: 3, source: img139 },
+    { id: 4, source: img140 },
+    { id: 5, source: img141 },
+    { id: 6, source: img142 },
+    { id: 7, source: img143 },
+    { id: 8, source: img144 },
+    { id: 9, source: img145 },
+    { id: 10, source: img146 },
+    { id: 11, source: img147 },
+    { id: 12, source: img148 },
   ],
 };

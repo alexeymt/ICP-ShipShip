@@ -84,7 +84,7 @@ export const VibeCheck = () => {
   const [isActionsDisabled, setIsActionsDisabled] = useState(false);
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
-  const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo, weddingInfo } = useStore();
+  const { isAuthenticated, login, myPartnerInfo, otherPartnerInfo, weddingInfo, handleGetWeddingInfo } = useStore();
 
   const handleMyBirthDateChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -128,54 +128,60 @@ export const VibeCheck = () => {
     setIsInputDisabled(false);
   }, [myBirthDate, myPartnerBirthDate, weddingActor, setIsActionsDisabled, setCheckResult]);
 
-  const handleConnect = useCallback(async () => {
-    if (isAuthenticated) {
-      if (weddingInfo?.id) {
-        if (!weddingInfo?.isPaid) {
-          navigate(routes.connect.root);
+  const handleRedirect = useCallback(() => {
+    if (weddingInfo?.id) {
+      if (!weddingInfo?.isPaid) {
+        navigate(routes.connect.root);
+        return;
+      }
+      if (myPartnerInfo && otherPartnerInfo) {
+        //with other partner
+        // both agreed to marry
+        if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {
+          navigate(routes.certificate.root);
           return;
         }
-        if (myPartnerInfo && otherPartnerInfo) {
-          //with other partner
-          // both agreed to marry
-          if (myPartnerInfo?.isAgreed && otherPartnerInfo?.isAgreed) {
-            navigate(routes.certificate.root);
-            return;
-          }
-          // one of partners agreed (any of partners started ceremony)
-          if (myPartnerInfo?.isAgreed || otherPartnerInfo?.isAgreed) {
-            console.log('here2');
-            navigate(routes.ceremony.root);
-            return;
-          }
-          // ring chosen and both partners started ceremony
-          if (myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
-            navigate(routes.ceremony.root);
-            return;
-          }
-          // ring not chosen and both partners started ceremony
-          if (!myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
-            navigate(routes.choose.root);
-            return;
-          }
-          //one of partners not started ceremony
-          if (!myPartnerInfo?.isWaiting || !otherPartnerInfo?.isWaiting) {
-            navigate(routes.waiting.root);
-          }
-        } else {
-          // no other partner in wedding
-          if (myPartnerInfo?.isWaiting) {
-            navigate(routes.waiting.root);
-          } else {
-            navigate(routes.connect.root);
-          }
+        // one of partners agreed (any of partners started ceremony)
+        if (myPartnerInfo?.isAgreed || otherPartnerInfo?.isAgreed) {
+          navigate(routes.ceremony.root);
+          return;
+        }
+        // ring chosen and both partners started ceremony
+        if (myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+          navigate(routes.ceremony.root);
+          return;
+        }
+        // ring not chosen and both partners started ceremony
+        if (!myPartnerInfo?.ring[0]?.data && myPartnerInfo?.isWaiting && otherPartnerInfo?.isWaiting) {
+          navigate(routes.choose.root);
+          return;
+        }
+        //one of partners not started ceremony
+        if (!myPartnerInfo?.isWaiting || !otherPartnerInfo?.isWaiting) {
+          navigate(routes.waiting.root);
         }
       } else {
-        // no wedding created
-        navigate(routes.connect.root);
+        // no other partner in wedding
+        if (myPartnerInfo?.isWaiting) {
+          navigate(routes.waiting.root);
+        } else {
+          navigate(routes.connect.root);
+        }
       }
     } else {
-      await login();
+      // no wedding created
+      navigate(routes.connect.root);
+    }
+  }, [isAuthenticated, login, myPartnerInfo, navigate, otherPartnerInfo?.isAgreed]);
+
+  const handleConnect = useCallback(async () => {
+    if (isAuthenticated) {
+      handleRedirect();
+    } else {
+      await login().then(async () => {
+        await handleGetWeddingInfo();
+        handleRedirect();
+      });
     }
   }, [isAuthenticated, login, myPartnerInfo, navigate, otherPartnerInfo?.isAgreed]);
 

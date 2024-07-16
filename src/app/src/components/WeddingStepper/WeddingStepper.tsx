@@ -2,15 +2,12 @@ import styled from '@emotion/styled';
 import { flexHelper } from '../../utils';
 import checkIcon from '../Icons/components/check.svg';
 import { FontFamily, Typography } from '../Typography';
-import { HeartBeatAnimation } from '../../styles/animations';
 
 const StyledHeart = styled(Typography)({
   display: 'inline-block',
   fontSize: '130px',
   lineHeight: '130px',
   zIndex: 10,
-
-  animation: `${HeartBeatAnimation} 1.5s infinite`,
 });
 
 const NameWrapper = styled.div({

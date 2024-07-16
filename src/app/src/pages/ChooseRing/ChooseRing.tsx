@@ -111,15 +111,15 @@ export const ChooseRing = () => {
   return (
     <PrivateRoute>
       <Container>
+        <TextWrapper>
+          <StyledTypography align="center" variant="h2" color="white">
+            Choose your ring
+          </StyledTypography>
+        </TextWrapper>
         <TopBlock>
           <div>
             <Select value={currentCollection} onChange={handleCollectionChange} options={Collections} />
           </div>
-          <TextWrapper>
-            <StyledTypography align="center" variant="h2" color="black">
-              Choose your ring
-            </StyledTypography>
-          </TextWrapper>
           <ChosenRingContainer>
             <Typography align="center" variant="h3" color="white">
               Your choice

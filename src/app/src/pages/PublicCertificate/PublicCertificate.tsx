@@ -46,6 +46,16 @@ const ICP = styled.img({
   zIndex: 0,
 });
 
+const RingImageWrapper = styled.div({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '70px',
+  height: '70px',
+  border: '1px solid white',
+  borderRadius: '10px',
+});
+
 const RingImage = styled.img({
   maxWidth: 50,
   width: '100%',
@@ -56,7 +66,7 @@ const Participants = styled.div({
   position: 'relative',
   width: '100%',
   ...flexHelper({ alignItems: 'center', justifyContent: 'center' }),
-  marginTop: 75,
+  marginTop: 40,
   '& > *': {
     zIndex: 10,
     transformStyle: 'preserve-3d',
@@ -167,7 +177,12 @@ export const PublicCertificate = () => {
             align="center"
             css={{ fontWeight: 400, textTransform: 'capitalize', marginBottom: 16 }}
           >
-            digital connection certificate
+            certificate
+          </Typography>
+
+          <Typography variant="h3" color="white" align="center" css={{ marginBottom: '40px' }}>
+            of <br />
+            digital <br /> connection
           </Typography>
 
           <Participants>
@@ -193,20 +208,17 @@ export const PublicCertificate = () => {
               {breakLinesOnString(certificateData?.partnerName2 || '')}
             </Typography>
 
-            <RingImage
-              src={certificateData?.ring1}
-              alt="ring"
-              css={{ position: 'absolute', left: '15px', top: '150px' }}
-            />
-            <RingImage
-              src={certificateData?.ring2}
-              alt="ring"
-              css={{ position: 'absolute', right: '15px', top: '150px' }}
-            />
+            <RingImageWrapper style={{ position: 'absolute', left: '15px', top: '150px' }}>
+              <RingImage src={certificateData?.ring1} alt="ring" />
+            </RingImageWrapper>
+
+            <RingImageWrapper style={{ position: 'absolute', right: '15px', top: '150px' }}>
+              <RingImage src={certificateData?.ring2} alt="ring" />
+            </RingImageWrapper>
           </Participants>
 
-          <Typography color="white" variant="body" align="center" css={{ marginTop: 72 }}>
-            Bonded <br /> Beyond Time & Distance
+          <Typography color="white" variant="body" align="center" css={{ marginTop: 120 }}>
+            issued
           </Typography>
 
           <Typography

@@ -3,7 +3,6 @@ import { CeremonyContainer } from '../../styles';
 import { Typography } from '../../components';
 import { useStore } from '../../hooks';
 import { useEffect } from 'react';
-import { HeartBeatAnimation } from '../../styles/animations';
 import { useSearchParams } from 'react-router-dom';
 
 const ContentWrapper = styled.div({
@@ -22,8 +21,6 @@ const StyledHeart = styled(Typography)({
   marginBottom: '40px',
   fontSize: '100px',
   lineHeight: '100px',
-
-  animation: `${HeartBeatAnimation} 1.5s infinite`,
 });
 
 export const Reject = () => {
