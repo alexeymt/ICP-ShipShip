@@ -2,7 +2,7 @@ import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
-import { Button, Input } from '../../components';
+import { Button, Input, Typography } from '../../components';
 import { routes } from '../../containers';
 import { useStore } from '../../hooks';
 import { CeremonyContainer, GradientTypography } from '../../styles';
@@ -46,8 +46,13 @@ export const Form = () => {
   }, []);
 
   useEffect(() => {
+    if (weddingInfo?.isRejected) {
+      navigate(routes.reject.root);
+      return;
+    }
     if (weddingInfo?.isPaid) {
       navigate(routes.waiting.root);
+      return;
     }
   }, [weddingInfo?.isPaid]);
 
@@ -93,18 +98,11 @@ export const Form = () => {
     }
   }, [myName, weddingActor, weddingInfo?.id, myPartnerInfo, handleGetWeddingInfo]);
 
-  const handlePayAndNavigateToWaitingPage = async () => {
-    try {
-      setIsActionsDisabled(true);
-      if (!weddingInfo?.isPaid) {
-        await weddingActor.testPay();
-        await handleGetWeddingInfo();
-      }
-      setIsActionsDisabled(false);
-    } catch (error) {
-      toast.error(`Payment was't successful`);
-      setIsActionsDisabled(false);
-    }
+  const handleNavigateToPaymentPage = async () => {
+    navigate({
+      pathname: routes.payment.root,
+      search: `?weddingId=${weddingInfo?.id}&acceptorName=${myPartnerName}`,
+    });
   };
 
   const handleGetLinkButtonClick = () => {
@@ -115,12 +113,16 @@ export const Form = () => {
   return (
     <CeremonyContainer>
       <GradientTypography variant="h1">Invite to pair</GradientTypography>
+      <Typography variant="subtitle2" align="center" css={{ marginTop: '20px' }}>
+        Invite your partner and get your love certificate for just 2 ICP <br />
+        (around 15 USD)
+      </Typography>
       <Input
         title="Your name"
         onChange={handleMyNameChange}
         onBlur={handleNameInputOnBlur}
         placeholder="Xiao Yan"
-        sx={{ marginTop: 39 }}
+        sx={{ marginTop: 30 }}
         disabled={isActionsDisabled}
         value={myName}
       />
@@ -151,10 +153,10 @@ export const Form = () => {
           <Button
             type="button"
             variant="secondary"
-            text="Wait for response"
+            text="Pay & Wait for Response"
             sx={responseButtonStyles}
             disabled={isActionsDisabled || myName.length === 0 || myPartnerName.length === 0 || !weddingInfo?.id}
-            onClick={handlePayAndNavigateToWaitingPage}
+            onClick={handleNavigateToPaymentPage}
           />
         </>
       )}

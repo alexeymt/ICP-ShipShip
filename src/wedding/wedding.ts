@@ -163,10 +163,6 @@ let rejectProposalHandler = (input) => {
     return;
   }
   let wedding = maybeWedding.Some!;
-  if ('Some' in wedding.partner2) {
-    console.log('proposal is already accepted');
-    return;
-  }
   wedding.isRejected = true;
   weddings.insert(weddingId, wedding);
   console.log('proposal is rejected');
