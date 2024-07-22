@@ -175,7 +175,7 @@ export const PublicCertificate = () => {
             color="white"
             family={FontFamily.PPMori}
             align="center"
-            css={{ fontWeight: 400, textTransform: 'capitalize', marginBottom: 16 }}
+            css={{ fontWeight: 400, textTransform: 'capitalize', marginBottom: 16, marginTop: '20px' }}
           >
             certificate
           </Typography>

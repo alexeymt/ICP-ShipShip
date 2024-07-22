@@ -54,7 +54,7 @@ export const Form = () => {
       navigate(routes.waiting.root);
       return;
     }
-  }, [weddingInfo?.isPaid]);
+  }, [weddingInfo?.isPaid, weddingInfo?.isRejected]);
 
   const handleMyNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setIsGetLinkClicked(false);

@@ -2,10 +2,10 @@ import styled from '@emotion/styled';
 import { useNavigate } from 'react-router';
 import { createSearchParams, useSearchParams } from 'react-router-dom';
 import { CeremonyContainer } from '../../styles';
-import { Button, Typography } from '../../components';
+import { Button, Input, Typography } from '../../components';
 import { routes } from '../../containers';
 import { useStore } from '../../hooks';
-import { useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 const buttonStyles = {
@@ -43,22 +43,52 @@ const ButtonsWrapper = styled.div({
   display: 'flex',
 });
 
+const Passcodes = ['AC3400', '2024BD', '40X20Z'];
+
 export const Payment = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [isActionsDisabled, setIsActionsDisabled] = useState(false);
   const weddingId = searchParams.get('weddingId');
   const acceptorName = searchParams.get('acceptorName');
 
   const { myPartnerInfo, weddingInfo, weddingActor, handleGetWeddingInfo } = useStore();
 
-  console.log(weddingInfo, weddingId);
-
   useEffect(() => {
     if (weddingInfo?.isPaid) {
       navigate(routes.waiting.root);
+      return;
     }
-  }, [weddingInfo?.isPaid]);
+
+    if (weddingInfo?.isRejected) {
+      navigate(routes.reject.root);
+      return;
+    }
+  }, [weddingInfo?.isPaid, weddingInfo?.isRejected]);
+
+  const handlePasscodeChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setPasscode(event.target.value);
+  }, []);
+
+  const handleSubmitButtonClick = () => {
+    setIsActionsDisabled(true);
+    let isPasscodeCorrect = false;
+    for (let i = 0; i < Passcodes.length; i++) {
+      if (Passcodes[i].toLowerCase() === passcode.toLowerCase()) {
+        isPasscodeCorrect = true;
+        break;
+      }
+    }
+    if (!isPasscodeCorrect) {
+      toast.error(`Passcode is not correct`);
+      setPasscode('');
+      setIsActionsDisabled(false);
+    } else {
+      handleConfirmButtonClick();
+    }
+  };
 
   const handleConfirmButtonClick = async () => {
     if (weddingInfo?.isRejected) {
@@ -78,6 +108,7 @@ export const Payment = () => {
       console.error(error);
       toast.error(`Payment was't successful`);
       setIsConfirmButtonDisabled(false);
+      setIsActionsDisabled(false);
     }
   };
 
@@ -101,8 +132,20 @@ export const Payment = () => {
         <StyledInvitation align="center" variant="h2" color="black">
           Please, pay 2 ICPs to get married 💖🚀
         </StyledInvitation>
+        <Typography variant="subtitle2" align="center" css={{ marginTop: '20px' }}>
+          You’re lucky! Just use the magic passcode to snag one for free.
+        </Typography>
+        <Input
+          title="Enter passcode"
+          onChange={handlePasscodeChange}
+          placeholder="Passcode"
+          sx={{ marginTop: 30 }}
+          disabled={isActionsDisabled}
+          value={passcode}
+        />
+
         <ButtonsWrapper>
-          <Button
+          {/* <Button
             type="button"
             variant="secondary"
             text="Confirm"
@@ -110,7 +153,15 @@ export const Payment = () => {
             onClick={handleConfirmButtonClick}
             disabled={isConfirmButtonDisabled}
           />
-          <Button type="button" variant="primary" text="Reject" sx={buttonStyles} onClick={handleRejectButtonClick} />
+          <Button type="button" variant="primary" text="Reject" sx={buttonStyles} onClick={handleRejectButtonClick} /> */}
+          <Button
+            type="button"
+            variant="secondary"
+            text="Submit"
+            sx={buttonStyles}
+            onClick={handleSubmitButtonClick}
+            disabled={isActionsDisabled}
+          />
         </ButtonsWrapper>
       </ContentWrapper>
     </CeremonyContainer>

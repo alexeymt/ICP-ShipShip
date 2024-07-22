@@ -1,10 +1,11 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 
 import { COLOR_PINK_LIGHT, COLOR_PINK_LIGHT_NO_OPACITY, GradientTypography, RADIUS_XS } from '../../styles';
 import { flexHelper } from '../../utils';
 import { Icon } from '../Icons';
 import { Typography } from '../Typography';
+import { useOutsideClick } from '../../hooks';
 
 export type CardProps = {
   imgSrc: string;
@@ -51,23 +52,27 @@ const DescriptionWrapper = styled.div({
 export const Card = ({ description, title, imgSrc }: CardProps) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  const handleMouseOver = () => {
+  const popupRef = useRef(null);
+
+  const handlePopupOpen = () => {
     setIsPopupOpen(true);
   };
 
-  const handleMouseOut = () => {
+  const handlePopupClose = () => {
     setIsPopupOpen(false);
   };
 
+  useOutsideClick({ ref: popupRef, fn: handlePopupClose });
+
   return (
-    <div style={{ position: 'relative', height: '397px' }}>
+    <div style={{ position: 'relative', height: '397px' }} ref={popupRef}>
       {isPopupOpen && (
         <Popup>
           <Typography variant="subtitle2">Coming soon</Typography>
         </Popup>
       )}
-      <CardWrapper>
-        <ContentWrapper onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+      <CardWrapper onClick={handlePopupOpen}>
+        <ContentWrapper>
           <TitleContainer>
             <GradientTypography variant="subtitle1" css={{ fontWeight: 600 }}>
               {title}
