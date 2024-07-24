@@ -13,6 +13,7 @@ import {
 import {_SERVICE as _LEDGER_SERVICE} from '../../../declarations/icp_ledger_canister/icp_ledger_canister.did';
 
 const IS_LOCAL = process.env.DFX_NETWORK === 'local';
+const PRICE = BigInt(process.env.PRICE || 200_000_000);
 
 const defaultOptions: {
   createOptions: AuthClientCreateOptions;
@@ -26,7 +27,7 @@ const defaultOptions: {
   },
   loginOptions: {
     identityProvider: IS_LOCAL
-      ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
+      ? `http://127.0.0.1:4943/?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}`
       : 'https://identity.ic0.app/#authorize',
   },
 };
@@ -162,6 +163,8 @@ const useStore_ = (options = defaultOptions) => {
     myPartnerInfo,
     otherPartnerInfo,
     updateClient,
+    ledgerCanisterId,
+    PRICE,
   };
 };
 
