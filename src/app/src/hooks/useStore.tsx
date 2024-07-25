@@ -27,7 +27,7 @@ const defaultOptions: {
   },
   loginOptions: {
     identityProvider: IS_LOCAL
-      ? `http://127.0.0.1:4943/?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}`
+      ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
       : 'https://identity.ic0.app/#authorize',
   },
 };

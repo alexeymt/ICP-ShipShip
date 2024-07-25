@@ -378,11 +378,6 @@ let payHandler = async () => {
   }
   let wedding = maybeWedding.Some!;
 
-  let partner = partners.get(wedding.partner1).Some!;
-  await mintPartnersRingAndUpdate(partner);
-  partner = partners.get(wedding.partner2.Some!).Some!;
-  await mintPartnersRingAndUpdate(partner);
-
   wedding.isPaid = true;
   weddings.insert(wedding.id, wedding);
   console.log(`wedding ${wedding.id.toString()} is paid`);

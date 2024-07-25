@@ -119,7 +119,7 @@ export const Payment = () => {
       }
       console.log(`txId: ${txId}`);
 
-      await weddingActor.testPay();
+      await weddingActor.pay();
 
       setIsRejectButtonDisabled(false);
       await handleGetWeddingInfo();
