@@ -2,11 +2,12 @@ import styled from '@emotion/styled';
 import { useNavigate } from 'react-router';
 import { createSearchParams, useSearchParams } from 'react-router-dom';
 import { CeremonyContainer } from '../../styles';
-import { Button, Input, Typography } from '../../components';
+import { Button, Typography } from '../../components';
 import { routes } from '../../containers';
 import { useStore } from '../../hooks';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import {Principal} from "@dfinity/principal";
 
 const buttonStyles = {
   display: 'flex',
@@ -43,18 +44,15 @@ const ButtonsWrapper = styled.div({
   display: 'flex',
 });
 
-const Passcodes = ['AC3400', '2024BD', '40X20Z'];
-
 export const Payment = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(false);
-  const [passcode, setPasscode] = useState('');
-  const [isActionsDisabled, setIsActionsDisabled] = useState(false);
+  const [isRejectButtonDisabled, setIsRejectButtonDisabled] = useState(false);
   const weddingId = searchParams.get('weddingId');
   const acceptorName = searchParams.get('acceptorName');
 
-  const { myPartnerInfo, weddingInfo, weddingActor, handleGetWeddingInfo } = useStore();
+  const { myPartnerInfo, weddingInfo, weddingActor, handleGetWeddingInfo, ledgerActor, ledgerCanisterId, PRICE } = useStore();
 
   useEffect(() => {
     if (weddingInfo?.isPaid) {
@@ -68,47 +66,68 @@ export const Payment = () => {
     }
   }, [weddingInfo?.isPaid, weddingInfo?.isRejected]);
 
-  const handlePasscodeChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setPasscode(event.target.value);
-  }, []);
-
-  const handleSubmitButtonClick = () => {
-    setIsActionsDisabled(true);
-    let isPasscodeCorrect = false;
-    for (let i = 0; i < Passcodes.length; i++) {
-      if (Passcodes[i].toLowerCase() === passcode.toLowerCase()) {
-        isPasscodeCorrect = true;
-        break;
-      }
-    }
-    if (!isPasscodeCorrect) {
-      toast.error(`Passcode is not correct`);
-      setPasscode('');
-      setIsActionsDisabled(false);
-    } else {
-      handleConfirmButtonClick();
-    }
-  };
-
   const handleConfirmButtonClick = async () => {
     if (weddingInfo?.isRejected) {
       toast.error('You have already rejected the proposal');
       await handleGetWeddingInfo();
       return;
     }
+    if (weddingInfo?.isPaid) {
+      toast.error('You have already paid for the ceremony');
+      navigate(routes.waiting.root);
+      return;
+    }
 
     try {
       setIsConfirmButtonDisabled(true);
-      if (!weddingInfo?.isPaid) {
-        await weddingActor.testPay();
-        toast.success('You have successfully paid for the ceremony');
+      if (!myPartnerInfo) {
+        toast.error('My partner info is not available');
+        setIsConfirmButtonDisabled(false);
+        return;
       }
+
+      const balance = await ledgerActor?.icrc1_balance_of({
+        owner: myPartnerInfo.id,
+        subaccount: [],
+      });
+      if (balance < PRICE) {
+        toast.error('You have insufficient balance');
+        setIsConfirmButtonDisabled(false);
+        return;
+      }
+
+      const ledgerPrincipal = Principal.fromText(ledgerCanisterId);
+      const tokenTx = await ledgerActor!.icrc1_transfer({
+          to: {
+              owner: ledgerPrincipal,
+              subaccount: [],
+          },
+          amount: BigInt(PRICE),
+          fee: [],
+          memo: [],
+          from_subaccount: [],
+          created_at_time: [],
+      });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const txId = tokenTx.Ok;
+      if (!txId) {
+        toast.error(`Payment was't successful`);
+        setIsConfirmButtonDisabled(false);
+        return;
+      }
+      console.log(`txId: ${txId}`);
+
+      await weddingActor.pay();
+
+      setIsRejectButtonDisabled(false);
       await handleGetWeddingInfo();
+      toast.success('You have successfully paid for the ceremony');
     } catch (error) {
       console.error(error);
       toast.error(`Payment was't successful`);
       setIsConfirmButtonDisabled(false);
-      setIsActionsDisabled(false);
     }
   };
 
@@ -132,20 +151,9 @@ export const Payment = () => {
         <StyledInvitation align="center" variant="h2" color="black">
           Please, pay 2 ICPs to get married 💖🚀
         </StyledInvitation>
-        <Typography variant="subtitle2" align="center" css={{ marginTop: '20px' }}>
-          You’re lucky! Just use the magic passcode to snag one for free.
-        </Typography>
-        <Input
-          title="Enter passcode"
-          onChange={handlePasscodeChange}
-          placeholder="Passcode"
-          sx={{ marginTop: 30 }}
-          disabled={isActionsDisabled}
-          value={passcode}
-        />
 
         <ButtonsWrapper>
-          {/* <Button
+          <Button
             type="button"
             variant="secondary"
             text="Confirm"
@@ -153,15 +161,7 @@ export const Payment = () => {
             onClick={handleConfirmButtonClick}
             disabled={isConfirmButtonDisabled}
           />
-          <Button type="button" variant="primary" text="Reject" sx={buttonStyles} onClick={handleRejectButtonClick} /> */}
-          <Button
-            type="button"
-            variant="secondary"
-            text="Submit"
-            sx={buttonStyles}
-            onClick={handleSubmitButtonClick}
-            disabled={isActionsDisabled}
-          />
+          <Button type="button" variant="primary" text="Reject" sx={buttonStyles} onClick={handleRejectButtonClick} disabled={isRejectButtonDisabled}/>
         </ButtonsWrapper>
       </ContentWrapper>
     </CeremonyContainer>

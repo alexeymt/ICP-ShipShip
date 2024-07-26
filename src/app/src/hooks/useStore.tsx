@@ -13,6 +13,7 @@ import {
 import {_SERVICE as _LEDGER_SERVICE} from '../../../declarations/icp_ledger_canister/icp_ledger_canister.did';
 
 const IS_LOCAL = process.env.DFX_NETWORK === 'local';
+const PRICE = BigInt(process.env.PRICE || 200_000_000);
 
 const defaultOptions: {
   createOptions: AuthClientCreateOptions;
@@ -162,6 +163,8 @@ const useStore_ = (options = defaultOptions) => {
     myPartnerInfo,
     otherPartnerInfo,
     updateClient,
+    ledgerCanisterId,
+    PRICE,
   };
 };
 
