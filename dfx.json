@@ -16,13 +16,7 @@
       "type": "custom",
       "candid": "https://raw.githubusercontent.com/dfinity/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/rs/rosetta-api/icp_ledger/ledger.did",
       "wasm": "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/canisters/ledger-canister.wasm.gz",
-      "gzip": true,
-      "remote": {
-        "id": {
-          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
-        }
-      },
-      "specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+      "gzip": true
     },
     "dip721_nft_container": {
       "type": "rust",

@@ -1,8 +1,18 @@
 {
   "app": {
-    "ic": "dqajm-6iaaa-aaaag-qcszq-cai"
+    "ic": "55cov-qqaaa-aaaal-qjhza-cai",
+    "local": "dqajm-6iaaa-aaaag-qcszq-cai"
   },
   "wedding": {
-    "ic": "dxbpy-tqaaa-aaaag-qcsza-cai"
+    "ic": "nkbpx-piaaa-aaaak-qipfq-cai",
+    "local": "bw4dl-smaaa-aaaaa-qaacq-cai"
+  },
+  "dip721_nft_container": {
+    "ic": "7tk6r-kyaaa-aaaal-ajnja-cai",
+    "local": "br5f7-7uaaa-aaaaa-qaaca-cai"
+  },
+  "icp_ledger_canister": {
+    "ic": "zedh2-tqaaa-aaaal-qjmrq-cai",
+    "local": "ryjl3-tyaaa-aaaaa-aaaba-cai"
   }
 }
