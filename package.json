@@ -1,5 +1,5 @@
 {
-  "name": "icp-staking",
+  "name": "icp-shipship",
   "scripts": {
     "start:dfx": "dfx start --background --clean --host \"127.0.0.1:4943\"",
     "start": "vite src/app --config vite.config.js",
