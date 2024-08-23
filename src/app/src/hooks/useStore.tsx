@@ -14,6 +14,9 @@ import {_SERVICE as _LEDGER_SERVICE} from '../../../declarations/icp_ledger_cani
 
 const IS_LOCAL = process.env.DFX_NETWORK === 'local';
 const PRICE = BigInt(process.env.PRICE || 200_000_000);
+const beneficiaryPrincipalId = process.env.BENEFICIARY_PRINCIPAL_ID || 'xmiaq-tnxoe-5hd4d-xdvt3-jtx4n-clnua-vdsca-zhhtp-tmut3-jwf3c-2qe';
+
+const ledgerCanisterId_ = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 
 const defaultOptions: {
   createOptions: AuthClientCreateOptions;
@@ -96,7 +99,7 @@ const useStore_ = (options = defaultOptions) => {
     });
     setWeddingActor(weddingActor_);
 
-    const ledgerActor_ = createLedgerActor(ledgerCanisterId, {
+    const ledgerActor_ = createLedgerActor(ledgerCanisterId_, {
       agentOptions: {
         identity: identity_,
       },
@@ -165,6 +168,7 @@ const useStore_ = (options = defaultOptions) => {
     updateClient,
     ledgerCanisterId,
     PRICE,
+    beneficiaryPrincipalId,
   };
 };
 
