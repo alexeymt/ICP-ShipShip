@@ -41,7 +41,7 @@ Frontend is written in React.js and TypeScript, build system is Vite. Source cod
 
 To start an app fill the `.env` file based on `.env.example` and run `yarn start`.
 
-Mainnet deployed NFT minter: https://mdh7i-waaaa-aaaag-qct4a-cai.icp0.io/
+Mainnet deployed app: https://55cov-qqaaa-aaaal-qjhza-cai.icp0.io/
 
 ## Setting up for local development
 
