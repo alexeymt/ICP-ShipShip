@@ -1,10 +1,10 @@
-# Ship Ship
+# ShipShip
 
 ## Description of Project
 
-Ship Ship - matching and wedding ICP project.
+ShipShip - matching and wedding ICP project.
 
-We have 2 canisters realized:
+We have 2 canisters implemented:
 
 1. wedding canister - this is an analog of the backend. This canister stores all weddings and information about each wedding. The following info: names, principals (this is Internet ID for DApp), wedding date, wedding id, current wedding status (just paired/married) There are two operations on this canister - match into a couple and agree to marry.
 
@@ -42,6 +42,19 @@ Frontend is written in React.js and TypeScript, build system is Vite. Source cod
 To start an app fill the `.env` file based on `.env.example` and run `yarn start`.
 
 Mainnet deployed app: https://55cov-qqaaa-aaaal-qjhza-cai.icp0.io/
+
+## Пополнение баланса
+
+1. В веб-приложении выполнить аутентификацию через Internet Identity (кнопка Login в правом верхнем углу)
+1. После входа в правом верхнем углу будет отображаться идентификатор вашего аккаунта (Principal ID)
+1. С помощью сервиса https://nns.ic0.app отправить необходимое количество ICP на ваш Principal ID
+1. После пополнения баланса вы сможете использовать функционал приложения
+
+## Balance Top-Up
+1. In the web application, authenticate via Internet Identity (click the Login button in the top right corner).
+1. After logging in, your account identifier (Principal ID) will be displayed in the top right corner.
+1. Use the service at https://nns.ic0.app to send the required amount of ICP to your Principal ID.
+1. Once your balance is topped up, you will be able to use the application's functionality.
 
 ## Setting up for local development
 
