@@ -47,13 +47,13 @@ Mainnet deployed app: https://55cov-qqaaa-aaaal-qjhza-cai.icp0.io/
 
 1. В веб-приложении выполнить аутентификацию через Internet Identity (кнопка Login в правом верхнем углу)
 1. После входа в правом верхнем углу будет отображаться идентификатор вашего аккаунта (Principal ID)
-1. С помощью сервиса https://nns.ic0.app отправить необходимое количество ICP на ваш Principal ID
+1. С помощью сервиса https://nns.ic0.app отправить необходимое количество ICP (2.01) на ваш Principal ID
 1. После пополнения баланса вы сможете использовать функционал приложения
 
 ## Balance Top-Up
 1. In the web application, authenticate via Internet Identity (click the Login button in the top right corner).
 1. After logging in, your account identifier (Principal ID) will be displayed in the top right corner.
-1. Use the service at https://nns.ic0.app to send the required amount of ICP to your Principal ID.
+1. Use the service at https://nns.ic0.app to send the required amount of ICP (2.01) to your Principal ID.
 1. Once your balance is topped up, you will be able to use the application's functionality.
 
 ## Setting up for local development
