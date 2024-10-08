@@ -1,22 +1,20 @@
 {
   "canisters": {
     "internet_identity": {
-      "type": "custom",
-      "candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-06-07/internet_identity.did",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2024-06-07/internet_identity_dev.wasm.gz",
-      "remote": {
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      },
       "frontend": {},
-      "specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+      "type": "pull",
+      "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
     },
-    "icp_ledger_canister": {
-      "type": "custom",
-      "candid": "https://raw.githubusercontent.com/dfinity/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/rs/rosetta-api/icp_ledger/ledger.did",
-      "wasm": "https://download.dfinity.systems/ic/69e1408347723dbaa7a6cd2faa9b65c42abbe861/canisters/ledger-canister.wasm.gz",
-      "gzip": true
+    "app": {
+      "type": "assets",
+      "build": "yarn build",
+      "source": [
+        "src/app/dist"
+      ],
+      "frontend": {},
+      "env": [
+        "BENEFICIARY_PRINCIPAL_ID"
+      ]
     },
     "dip721_nft_container": {
       "type": "rust",
@@ -31,13 +29,11 @@
       "candid": "src/wedding/wedding.did",
       "wasm": ".azle/wedding/wedding.wasm",
       "gzip": true,
-      "specified_id": "bw4dl-smaaa-aaaaa-qaacq-cai"
-    },
-    "app": {
-      "type": "assets",
-      "build": "yarn build",
-      "source": ["src/app/dist"],
-      "frontend": {}
+      "remote": {
+        "id": {
+          "ic": "nkbpx-piaaa-aaaak-qipfq-cai"
+        }
+      }
     }
   },
   "defaults": {

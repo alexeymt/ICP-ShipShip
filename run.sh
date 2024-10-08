@@ -1,4 +1,4 @@
-rm -rf .azle && rm -rf .dfx && rm -rf node_modules && rm .env && rm package-lock.json && rm yarn.lock && rm -rf src/app/dist && rm -rf src/declarations
+rm -rf .azle && rm -rf .dfx && rm -rf node_modules && rm yarn.lock && rm -rf src/app/dist && rm -rf src/declarations && rm -rf ./target/
 dfx stop
 kill $(lsof -t -i:4943)
 
@@ -28,7 +28,7 @@ dfx identity use shipship && BENEFICIARY=$(dfx identity get-principal) && export
 
 dfx deploy internet_identity
 dfx generate
-dfx deploy dip721_nft_container --argument "(record {name = \"Ship-Ship Rings\";logo=null;symbol=\"SSRNG\";custodians = opt vec { principal \"bw4dl-smaaa-aaaaa-qaacq-cai\" };})"
+dfx deploy dip721_nft_container --argument "(record {name = \"Ship-Ship Rings\";logo=null;symbol=\"SSRNG\";custodians = opt vec { principal \"f7dpy-iem7z-bj6yb-om4lr-gwwm3-g4bhi-vjs64-q6rtd-q4yg2-sapnr-kae\" };})"
 
 dfx deploy wedding # --argument "(record {beneficiary = \"$BENEFICIARY\"})"
 dfx deploy app

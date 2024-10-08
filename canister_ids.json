@@ -10,9 +10,5 @@
   "dip721_nft_container": {
     "ic": "7tk6r-kyaaa-aaaal-ajnja-cai",
     "local": "br5f7-7uaaa-aaaaa-qaaca-cai"
-  },
-  "icp_ledger_canister": {
-    "ic": "zedh2-tqaaa-aaaal-qjmrq-cai",
-    "local": "ryjl3-tyaaa-aaaaa-aaaba-cai"
   }
 }

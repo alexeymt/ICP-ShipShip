@@ -52,7 +52,7 @@ export const Payment = () => {
   const weddingId = searchParams.get('weddingId');
   const acceptorName = searchParams.get('acceptorName');
 
-  const { myPartnerInfo, weddingInfo, weddingActor, handleGetWeddingInfo, ledgerActor, ledgerCanisterId, PRICE } = useStore();
+  const { principal, myPartnerInfo, weddingInfo, weddingActor, handleGetWeddingInfo, ledgerActor, beneficiaryPrincipalId, PRICE } = useStore();
 
   useEffect(() => {
     if (weddingInfo?.isPaid) {
@@ -87,19 +87,20 @@ export const Payment = () => {
       }
 
       const balance = await ledgerActor?.icrc1_balance_of({
-        owner: myPartnerInfo.id,
+        owner: principal,
         subaccount: [],
       });
+
       if (balance < PRICE) {
         toast.error('You have insufficient balance');
         setIsConfirmButtonDisabled(false);
         return;
       }
 
-      const ledgerPrincipal = Principal.fromText(ledgerCanisterId);
+      const beneficiaryPrincipal = Principal.fromText(beneficiaryPrincipalId);
       const tokenTx = await ledgerActor!.icrc1_transfer({
           to: {
-              owner: ledgerPrincipal,
+              owner: beneficiaryPrincipal,
               subaccount: [],
           },
           amount: BigInt(PRICE),
@@ -112,8 +113,9 @@ export const Payment = () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const txId = tokenTx.Ok;
+
       if (!txId) {
-        toast.error(`Payment was't successful`);
+        toast.error(`Payment wasn't successful`);
         setIsConfirmButtonDisabled(false);
         return;
       }
@@ -126,7 +128,7 @@ export const Payment = () => {
       toast.success('You have successfully paid for the ceremony');
     } catch (error) {
       console.error(error);
-      toast.error(`Payment was't successful`);
+      toast.error(`Payment wasn't successful`);
       setIsConfirmButtonDisabled(false);
     }
   };
